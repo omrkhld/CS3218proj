@@ -57,4 +57,8 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void go_to_doppler(View view){
+
+    }
+
 }
