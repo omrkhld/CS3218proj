@@ -1,0 +1,48 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:paddingBottom="@dimen/activity_vertical_margin"
+              android:paddingLeft="@dimen/activity_horizontal_margin"
+              android:paddingRight="@dimen/activity_horizontal_margin"
+              android:paddingTop="@dimen/activity_vertical_margin"
+              tools:context=".MainActivityFragment"
+              tools:showIn="@layout/activity_main">
+
+    <Button
+        android:id="@+id/button_all_sensors_together"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="all_sensors"
+        android:text="@string/ALL_SENSORS"/>
+
+    <Button
+        android:id="@+id/button_"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="go_to_accelerometer"
+        android:text="@string/ACCELEROMETER"/>
+
+    <Button
+        android:id="@+id/button_camera"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="go_to_camera"
+        android:text="@string/CAMERA"/>
+
+    <Button
+        android:id="@+id/button_microphone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="go_to_microphone"
+        android:text="@string/MICROPHONE"/>
+
+    <Button
+        android:id="@+id/button_doppler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="go_to_doppler"
+        android:text="@string/DOPPLER"/>
+
+</LinearLayout>
