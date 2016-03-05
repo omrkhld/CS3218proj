@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">OzTrafficCamera</string>
+    <string name="ALL_SENSORS">ALL SENSORS</string>
+    <string name="CAMERA">CAMERA</string>
+    <string name="ACCELEROMETER">ACCELEROMETER</string>
+    <string name="MICROPHONE">MICROPHONE</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="action_settings">Settings</string>
 </resources>
