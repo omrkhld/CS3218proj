@@ -1,5 +1,6 @@
 package sg.edu.nus.oztrafficcamera;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -50,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void go_to_microphone(View view){
+        Intent myIntent = new Intent(this, MicrophoneActivity.class);
+        startActivity(myIntent);
 
     }
 

@@ -18,7 +18,7 @@
         android:text="@string/ALL_SENSORS"/>
 
     <Button
-        android:id="@+id/button_"
+        android:id="@+id/button_accelerometer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="go_to_accelerometer"
