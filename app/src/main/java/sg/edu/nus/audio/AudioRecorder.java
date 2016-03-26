@@ -1,4 +1,4 @@
-package sg.edu.nus.oztrafficcamera;
+package sg.edu.nus.audio;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;
@@ -29,6 +29,8 @@ public class AudioRecorder {
 
     private AsyncTask recordTask;
     private boolean   heardCar;
+
+    public double heardVolume = 0;
 
     public AudioRecorder(AudioClipListener clipListener) {
         this.audioClipListener = clipListener;
@@ -113,7 +115,8 @@ public class AudioRecorder {
                 } else {
                     // No error, start processing
                     heardCar = audioClipListener.heard(readBuffer, sampleRate); // If return true, stop recording.
-
+                    heardVolume = audioClipListener.currentVolume;
+                    
                     if (heardCar) {
                         stopRecording();
                     }

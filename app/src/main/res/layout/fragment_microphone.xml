@@ -6,7 +6,7 @@
                 android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:paddingRight="@dimen/activity_horizontal_margin"
                 android:paddingTop="@dimen/activity_vertical_margin"
-                tools:context="sg.edu.nus.oztrafficcamera.MicrophoneActivityFragment"
+                tools:context="sg.edu.nus.audio.MicrophoneActivityFragment"
                 tools:showIn="@layout/activity_microphone">
 
     <Button
@@ -15,6 +15,22 @@
         android:layout_height="wrap_content"
         android:onClick="start_microphone"
         android:text="@string/START_MICROPHONE"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="STATUS"
+        android:id="@+id/textview_audio_status"
+        android:layout_below="@+id/button_start_microphone"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="LOG"
+        android:id="@+id/textview_audio_log"
+        android:layout_below="@+id/textview_audio_status"
+        android:layout_centerHorizontal="true"/>
 
 
 </RelativeLayout>

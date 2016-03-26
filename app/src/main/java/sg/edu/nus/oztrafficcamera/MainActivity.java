@@ -1,12 +1,17 @@
 package sg.edu.nus.oztrafficcamera;
 
 import android.content.Intent;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
+import sg.edu.nus.accelerometer.AccelerometerActivity;
+import sg.edu.nus.audio.MicrophoneActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -57,11 +62,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void go_to_accelerometer(View view){
+        Intent myIntent = new Intent(this, AccelerometerActivity.class);
+        startActivity(myIntent);
 
     }
 
     public void go_to_doppler(View view){
-
+        ToneGenerator toneG = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
+        toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200);
+        Intent intent = new Intent(this, BlankActivity.class);
+        startActivity(intent);
+//        try {
+////            ToneGenerator toneG = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
+////            toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200);
+//        } catch (Exception e) {
+////            e.printStackTrace();
+//        }
     }
 
 }

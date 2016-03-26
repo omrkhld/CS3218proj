@@ -10,4 +10,7 @@
     <string name="title_activity_microphone">MicrophoneActivity</string>
 
     <string name="START_MICROPHONE">START MICROPHONE</string>
+    <string name="audio_status_recording">Starting to Record</string>
+    <string name="audio_status_stopped">Stopped recording</string>
+    <string name="title_activity_accelerometer">AccelerometerActivity</string>
 </resources>
