@@ -1,9 +1,14 @@
 package sg.edu.nus.accelerometer;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.design.widget.FloatingActionButton;
@@ -12,6 +17,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.TextView;
 
+import sg.edu.nus.data.SensorDBHelper;
+import sg.edu.nus.data.SensorsContract;
 import sg.edu.nus.oztrafficcamera.R;
 
 public class AccelerometerActivity extends AppCompatActivity implements SensorEventListener{
@@ -29,6 +36,8 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
     private TextView  textview_accelerometer_fps;
     private TextView textview_lag;
     private Boolean calibratePressed;
+    private Sensor mAcc;
+
 
     long lagTime;
 
@@ -49,12 +58,13 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
 
         // Use with getSystemService to retrieve an android.hardware.SensorManager for accessing sensors.
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        mAcc = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         // Use method getDefaultSensor to get the default sensor for a given type.
         // Note that the returned sensor could be a composite sensor, and its data
         // could be averaged or filtered.
-        if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
+        if (mAcc != null) {
             sensorManager.registerListener(this,
-                    sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), //Create instance of specific sensor
+                    mAcc, //Create instance of specific sensor
                     SensorManager.SENSOR_DELAY_UI);
         } else{
 
@@ -87,6 +97,18 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        sensorManager.unregisterListener(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        sensorManager.registerListener(this, mAcc, SensorManager.SENSOR_DELAY_UI);
+    }
+
+    @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
 
@@ -109,6 +131,15 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
             if (calibratePressed){
                 textview_lag.setText(String.format("%d", diff));
                 calibratePressed = false;
+
+                AccelerometerReading reading = new AccelerometerReading(timestamp, ax, ay, az);
+
+                //Starts asyncTask to write to database
+                WriteToDatabaseTask task = new WriteToDatabaseTask(this);
+                task.execute(reading);
+
+//
+
             }
         }
 
@@ -117,5 +148,55 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
+    }
+
+    public void view_acc_log(View view){
+        Intent intent = new Intent(this, AccelerometerDBLog.class);
+        startActivity(intent);
+    }
+    class WriteToDatabaseTask extends AsyncTask<AccelerometerReading, Void, Long>{
+        private Context ctx;
+
+        public WriteToDatabaseTask(Context ctx) {
+            this.ctx = ctx;
+        }
+
+        @Override
+        protected Long doInBackground(AccelerometerReading... params) {
+            //Get DBHelper to write to database
+            SensorDBHelper helper = new SensorDBHelper(ctx);
+            SQLiteDatabase db = helper.getWritableDatabase();
+
+            if (params.length == 0) {
+                return null;
+            }
+
+            AccelerometerReading reading = params[0];
+            //Put in the values within a ContentValues.
+            ContentValues values = new ContentValues();
+            values.clear();
+            values.put(SensorsContract.AccelerometerEntry.COLUMN_TIMESTAMP, reading.getTimestamp());
+            values.put(SensorsContract.AccelerometerEntry.COLUMN_AX, reading.getAx());
+            values.put(SensorsContract.AccelerometerEntry.COLUMN_AY, reading.getAy());
+            values.put(SensorsContract.AccelerometerEntry.COLUMN_AZ, reading.getAz());
+
+
+            //Insert the values into the Table for Tasks
+            db.insertWithOnConflict(
+                    SensorsContract.AccelerometerEntry.TABLE_NAME,
+                    null,
+                    values,
+                    SQLiteDatabase.CONFLICT_IGNORE);
+
+            return reading.getTimestamp();
+
+        }
+
+        @Override
+        protected void onPostExecute(Long aLong) {
+            super.onPostExecute(aLong);
+            textview_lag.setText(String.valueOf(aLong));
+
+        }
     }
 }

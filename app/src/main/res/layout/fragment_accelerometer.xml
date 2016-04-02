@@ -137,5 +137,13 @@
             android:layout_weight="8"/>
     </LinearLayout>
 
+    <Button
+        android:id="@+id/btn_view_acc_db"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="View Log"
+        android:onClick="view_acc_log"/>
+
 
 </LinearLayout>

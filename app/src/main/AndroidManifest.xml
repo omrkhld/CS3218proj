@@ -33,6 +33,8 @@
             android:label="@string/title_activity_accelerometer"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
+        <activity android:name="sg.edu.nus.accelerometer.AccelerometerDBLog">
+        </activity>
     </application>
 
 </manifest>
