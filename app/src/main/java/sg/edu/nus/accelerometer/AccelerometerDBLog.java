@@ -25,35 +25,34 @@ public class AccelerometerDBLog extends AppCompatActivity {
 
         //Get DBHelper to read from database
         SensorDBHelper helper = new SensorDBHelper(this);
-        SQLiteDatabase sqlDB = helper.getReadableDatabase();
+        SQLiteDatabase sqlDB  = helper.getReadableDatabase();
 
         //Query database to get any existing data
         Cursor cursor = sqlDB.query(SensorsContract.AccelerometerEntry.TABLE_NAME,
                 new String[]{SensorsContract.AccelerometerEntry._ID,
                         SensorsContract.AccelerometerEntry.COLUMN_TIMESTAMP,
-                SensorsContract.AccelerometerEntry.COLUMN_AX,
-                SensorsContract.AccelerometerEntry.COLUMN_AY,
-                SensorsContract.AccelerometerEntry.COLUMN_AZ},
+                        SensorsContract.AccelerometerEntry.COLUMN_AX,
+                        SensorsContract.AccelerometerEntry.COLUMN_AY,
+                        SensorsContract.AccelerometerEntry.COLUMN_AZ},
                 null, null, null, null, null);
 
-                cursor.moveToFirst();
-                long timestamp1 = cursor.getLong(
-                        cursor.getColumnIndexOrThrow(SensorsContract.AccelerometerEntry.COLUMN_TIMESTAMP)
-                );
-
+        cursor.moveToFirst();
+//        long timestamp1 = cursor.getLong(
+//                cursor.getColumnIndexOrThrow(SensorsContract.AccelerometerEntry.COLUMN_TIMESTAMP)
+//        );
 
         listAdapter = new SimpleCursorAdapter(
                 this,
                 R.layout.log_acc_view,
                 cursor,
-                new String[] { SensorsContract.AccelerometerEntry.COLUMN_TIMESTAMP,
-                SensorsContract.AccelerometerEntry.COLUMN_AX,
-                SensorsContract.AccelerometerEntry.COLUMN_AY,
-                SensorsContract.AccelerometerEntry.COLUMN_AZ},
-                new int[] { R.id.log_acc_textview_timestamp,
-                R.id.log_acc_textview_x,
-                R.id.log_acc_textview_y,
-                R.id.log_acc_textview_z},
+                new String[]{SensorsContract.AccelerometerEntry.COLUMN_TIMESTAMP,
+                        SensorsContract.AccelerometerEntry.COLUMN_AX,
+                        SensorsContract.AccelerometerEntry.COLUMN_AY,
+                        SensorsContract.AccelerometerEntry.COLUMN_AZ},
+                new int[]{R.id.log_acc_textview_timestamp,
+                        R.id.log_acc_textview_x,
+                        R.id.log_acc_textview_y,
+                        R.id.log_acc_textview_z},
                 0
         );
 
