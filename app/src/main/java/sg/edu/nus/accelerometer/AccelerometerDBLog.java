@@ -30,7 +30,10 @@ public class AccelerometerDBLog extends AppCompatActivity {
         //Query database to get any existing data
         Cursor cursor = sqlDB.query(SensorsContract.AccelerometerEntry.TABLE_NAME,
                 new String[]{SensorsContract.AccelerometerEntry._ID,
-                        SensorsContract.AccelerometerEntry.COLUMN_TIMESTAMP},
+                        SensorsContract.AccelerometerEntry.COLUMN_TIMESTAMP,
+                SensorsContract.AccelerometerEntry.COLUMN_AX,
+                SensorsContract.AccelerometerEntry.COLUMN_AY,
+                SensorsContract.AccelerometerEntry.COLUMN_AZ},
                 null, null, null, null, null);
 
                 cursor.moveToFirst();
@@ -43,8 +46,14 @@ public class AccelerometerDBLog extends AppCompatActivity {
                 this,
                 R.layout.log_acc_view,
                 cursor,
-                new String[] { SensorsContract.AccelerometerEntry.COLUMN_TIMESTAMP},
-                new int[] { R.id.log_acc_textview},
+                new String[] { SensorsContract.AccelerometerEntry.COLUMN_TIMESTAMP,
+                SensorsContract.AccelerometerEntry.COLUMN_AX,
+                SensorsContract.AccelerometerEntry.COLUMN_AY,
+                SensorsContract.AccelerometerEntry.COLUMN_AZ},
+                new int[] { R.id.log_acc_textview_timestamp,
+                R.id.log_acc_textview_x,
+                R.id.log_acc_textview_y,
+                R.id.log_acc_textview_z},
                 0
         );
 

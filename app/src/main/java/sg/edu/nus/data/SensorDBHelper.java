@@ -15,7 +15,7 @@ import java.nio.channels.FileChannel;
  */
 public class SensorDBHelper extends SQLiteOpenHelper{
 
-    static final int DATABASE_VERSION  = 2;
+    static final int DATABASE_VERSION  = 3;
     static final String DATABASE_NAME = "sensors.db";
 
     public SensorDBHelper(Context context){
