@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
@@ -14,6 +15,8 @@ import sg.edu.nus.oztrafficcamera.R;
 
 public class AccelerometerDBLog extends AppCompatActivity {
     private ListAdapter listAdapter;
+    SensorDBHelper helper;
+    ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,12 +24,16 @@ public class AccelerometerDBLog extends AppCompatActivity {
         setContentView(R.layout.activity_accelerometer_dblog);
 
         //Find the listView
-        ListView listView = (ListView) findViewById(R.id.listview_acc_log);
+        listView = (ListView) findViewById(R.id.listview_acc_log);
 
         //Get DBHelper to read from database
-        SensorDBHelper helper = new SensorDBHelper(this);
+        helper = new SensorDBHelper(this);
         SQLiteDatabase sqlDB  = helper.getReadableDatabase();
+        updateListView(sqlDB);
 
+    }
+
+    private void updateListView(SQLiteDatabase sqlDB) {
         //Query database to get any existing data
         Cursor cursor = sqlDB.query(SensorsContract.AccelerometerEntry.TABLE_NAME,
                 new String[]{SensorsContract.AccelerometerEntry._ID,
@@ -37,9 +44,6 @@ public class AccelerometerDBLog extends AppCompatActivity {
                 null, null, null, null, null);
 
         cursor.moveToFirst();
-//        long timestamp1 = cursor.getLong(
-//                cursor.getColumnIndexOrThrow(SensorsContract.AccelerometerEntry.COLUMN_TIMESTAMP)
-//        );
 
         listAdapter = new SimpleCursorAdapter(
                 this,
@@ -57,7 +61,13 @@ public class AccelerometerDBLog extends AppCompatActivity {
         );
 
         //Create a new TaskAdapter and bind it to ListView
-//        mTaskAdapter = new TaskAdapter(getActivity(), cursor);
         listView.setAdapter(listAdapter);
+    }
+
+    public void clear_database(View view){
+        SQLiteDatabase db = helper.getWritableDatabase();
+        db.delete(SensorsContract.AccelerometerEntry.TABLE_NAME, null, null);
+
+        updateListView(db);
     }
 }

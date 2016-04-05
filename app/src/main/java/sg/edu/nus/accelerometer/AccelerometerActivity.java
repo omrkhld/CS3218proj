@@ -70,16 +70,13 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
 
         }
 
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_accelerometer);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
                 /*
                 The first value indicates the number of milliseconds to wait before turning the vibrator on.
                 The next value indicates the number of milliseconds for which to keep the vibrator on before
@@ -87,11 +84,11 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
                 vibrator off or to turn the vibrator on.
                  */
                 long [] vibratePattern = {0, 250, 0};
-                lagTime = System.currentTimeMillis();
                 calibratePressed = true;
 
                 Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-                vibrator.vibrate(vibratePattern, -1);
+                vibrator.vibrate(vibratePattern, -1); // -1 for not repeating
+                lagTime = System.currentTimeMillis();
             }
         });
     }
@@ -138,8 +135,6 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
                 WriteToDatabaseTask task = new WriteToDatabaseTask(this);
                 task.execute(reading);
 
-//
-
             }
         }
 
@@ -154,6 +149,7 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
         Intent intent = new Intent(this, AccelerometerDBLog.class);
         startActivity(intent);
     }
+
     class WriteToDatabaseTask extends AsyncTask<AccelerometerReading, Void, Long>{
         private Context ctx;
 
