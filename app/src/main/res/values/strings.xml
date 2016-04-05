@@ -13,4 +13,7 @@
     <string name="audio_status_recording">Starting to Record</string>
     <string name="audio_status_stopped">Stopped recording</string>
     <string name="title_activity_accelerometer">AccelerometerActivity</string>
+    <string name="Calibrate">Calibration</string>
+    <string name="Application">Application</string>
+    <string name="testing">Testing</string>
 </resources>
