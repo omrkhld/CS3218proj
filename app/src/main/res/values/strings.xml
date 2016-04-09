@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">OzTrafficCamera</string>
-    <string name="ALL_SENSORS">ALL SENSORS</string>
     <string name="CAMERA">CAMERA</string>
     <string name="ACCELEROMETER">ACCELEROMETER</string>
     <string name="MICROPHONE">MICROPHONE</string>
@@ -15,5 +14,9 @@
     <string name="title_activity_accelerometer">AccelerometerActivity</string>
     <string name="Calibrate">Calibration</string>
     <string name="Application">Application</string>
+
+    <string name="all_sensors">All Sensors</string>
     <string name="testing">Testing</string>
+    <string name="VIEW_MIC_LOG">View Log</string>
+    <string name="clear_log">Clear log</string>
 </resources>

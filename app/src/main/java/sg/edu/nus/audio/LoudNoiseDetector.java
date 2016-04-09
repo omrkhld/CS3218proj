@@ -8,7 +8,7 @@ import android.util.Log;
 public class LoudNoiseDetector implements AudioClipListener {
     private static final String TAG = "LoudNoiseDetector";
     private double volumeThreshold;
-    public static final int DEFAULT_LOUDNESS_THRESHOLD = 10000;
+    public static final int DEFAULT_LOUDNESS_THRESHOLD = 2000;
     public double currentVolume = 0;
 
     public LoudNoiseDetector() {

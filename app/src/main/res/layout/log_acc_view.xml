@@ -1,27 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        android:layout_weight="1">
+
+        <ImageView android:id="@+id/image_view"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:adjustViewBounds="true"
+                   android:maxWidth="24dp"
+                   android:maxHeight="24dp"
+                   android:scaleType="fitCenter"
+                   android:layout_marginLeft="3dp"
+                   android:src="@drawable/ic_clock"
+            />
+
+        <TextView
+            android:id="@+id/log_acc_textview_timestamp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        android:layout_weight="1">
+    <TextView
+        android:id="@+id/log_acc_textview_x"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"/>
 
     <TextView
-        android:layout_width="match_parent"
+        android:id="@+id/log_acc_textview_y"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:id="@+id/log_acc_textview_timestamp"/>
+        android:layout_weight="1"/>
 
     <TextView
-        android:layout_width="match_parent"
+        android:id="@+id/log_acc_textview_z"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:id="@+id/log_acc_textview_x"/>
+        android:layout_weight="1"/>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/log_acc_textview_y"/>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/log_acc_textview_z"/>
+    </LinearLayout>
 
 </LinearLayout>

@@ -34,6 +34,8 @@
         </activity>
         <activity android:name="sg.edu.nus.accelerometer.AccelerometerDBLog">
         </activity>
+        <activity android:name="sg.edu.nus.audio.MicrophoneDBLog">
+        </activity>
     </application>
 
 </manifest>

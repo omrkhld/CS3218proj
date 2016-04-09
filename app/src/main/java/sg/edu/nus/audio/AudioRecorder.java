@@ -116,9 +116,15 @@ public class AudioRecorder {
                     // No error, start processing
                     heardCar = audioClipListener.heard(readBuffer, sampleRate); // If return true, stop recording.
                     heardVolume = audioClipListener.currentVolume;
+
+                    //Write readBuffer to database
                     
                     if (heardCar) {
                         stopRecording();
+
+                        //Measure time lag between now and start
+
+                        // But dont stop, wait for external to cancel.
                     }
                 }
             }

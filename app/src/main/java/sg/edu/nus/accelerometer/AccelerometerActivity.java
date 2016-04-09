@@ -11,9 +11,9 @@ import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -21,7 +21,7 @@ import sg.edu.nus.data.SensorDBHelper;
 import sg.edu.nus.data.SensorsContract;
 import sg.edu.nus.oztrafficcamera.R;
 
-public class AccelerometerActivity extends AppCompatActivity implements SensorEventListener{
+public class AccelerometerActivity extends AppCompatActivity implements SensorEventListener {
 
     /*
     1. Create an instance of the sensor service. Provide methods to access and list sensors,
@@ -29,17 +29,25 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
      Also has some constants to report sensor accuracy, set data acquisition rates and calibrate sensor.
     */
     private SensorManager sensorManager;
-    private double ax, ay, az;
+    private double        ax, ay, az;
     long mLastTime = 0;
+    long timestamp = 0;
+    long diff      = 0;
+
+    private double minX, maxX, minY, maxY, minZ, maxZ; //for calibration
+    int countRounds;
 
     private TextView textview_ax, textview_ay, textview_az, textview_accelerometer_timestamp;
-    private TextView  textview_accelerometer_fps;
+    private TextView textview_accelerometer_fps;
     private TextView textview_lag;
-    private Boolean calibratePressed;
-    private Sensor mAcc;
-
+    private Boolean  calibratePressed;
+    private Boolean  isStabilised;
+    private Boolean  isLargeChanges;
+    private Sensor   mAcc;
 
     long lagTime;
+
+    public static  final int THRESHOLD_NUM_AXES_WITH_LARGE_CHANGES = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,15 +58,14 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
         textview_ax = (TextView) findViewById(R.id.textview_ax);
         textview_ay = (TextView) findViewById(R.id.textview_ay);
         textview_az = (TextView) findViewById(R.id.textview_az);
-
         textview_accelerometer_timestamp = (TextView) findViewById(R.id.textview_accelerometer_timestamp);
         textview_accelerometer_fps = (TextView) findViewById(R.id.textview_accelerometer_fps);
         textview_lag = (TextView) findViewById(R.id.textview_lag);
 
-
         // Use with getSystemService to retrieve an android.hardware.SensorManager for accessing sensors.
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mAcc = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
         // Use method getDefaultSensor to get the default sensor for a given type.
         // Note that the returned sensor could be a composite sensor, and its data
         // could be averaged or filtered.
@@ -66,31 +73,27 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
             sensorManager.registerListener(this,
                     mAcc, //Create instance of specific sensor
                     SensorManager.SENSOR_DELAY_UI);
-        } else{
-
+        } else {
         }
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+    }
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_accelerometer);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                /*
-                The first value indicates the number of milliseconds to wait before turning the vibrator on.
-                The next value indicates the number of milliseconds for which to keep the vibrator on before
-                turning it off. Subsequent values alternate between durations in milliseconds to turn the
-                vibrator off or to turn the vibrator on.
-                 */
-                long [] vibratePattern = {0, 250, 0};
-                calibratePressed = true;
+    /*
+    * Starts the calibration after stabilisation
+    * */
+    public void calibrate_acc(View view) {
+        calibratePressed = true;
+        countRounds = 5;
+        maxX = minX = ax;
+        maxY = minY = ay;
+        maxZ = minZ = az;
 
-                Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-                vibrator.vibrate(vibratePattern, -1); // -1 for not repeating
-                lagTime = System.currentTimeMillis();
-            }
-        });
+        lagTime = System.currentTimeMillis();
+        long[] vibratePattern = {0, 200, 0};
+
+        Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+        vibrator.vibrate(vibratePattern, -1); // -1 for not repeating
     }
 
     @Override
@@ -107,12 +110,11 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
 
-            long timestamp = System.currentTimeMillis();
-            long diff = timestamp - mLastTime;
-            textview_accelerometer_fps.setText(String.format("%.2f",
-                    1.0/diff*1000) );
+            timestamp = System.currentTimeMillis();
+            diff = timestamp - mLastTime;
+            textview_accelerometer_fps.setText(String.format("%.2f", 1.0 / diff * 1000));
             mLastTime = timestamp;
 
             ax = event.values[0];
@@ -125,19 +127,69 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
 
             textview_accelerometer_timestamp.setText(String.valueOf(timestamp));
 
-            if (calibratePressed){
-                textview_lag.setText(String.format("%d", diff));
-                calibratePressed = false;
+            //Loop a few rounds to find stable values
+            if (countRounds > 0) {
+                if (ax < minX) {
+                    minX = ax;
+                } else {
+                    maxX = ax;
+                }
 
-                AccelerometerReading reading = new AccelerometerReading(timestamp, ax, ay, az);
+                if (ay < minY) {
+                    minY = ay;
+                } else {
+                    maxY = ay;
+                }
 
-                //Starts asyncTask to write to database
-                WriteToDatabaseTask task = new WriteToDatabaseTask(this);
-                task.execute(reading);
+                if (az < maxZ) {
+                    minZ = az;
+                } else {
+                    maxZ = az;
+                }
+                countRounds--;
+            } else {
+                isStabilised = true;
+            }
+
+            Log.v("AX min and max:", minX + " " + maxX);
+            Log.v("AY min and max:", minY + " " + maxY);
+            Log.v("AZ min and max:", minZ + " " + maxZ);
+
+            if (calibratePressed && isStabilised) {
+                isLargeChanges = detectLargeChange(ax, ay, az);
+                Log.v("Large change", String.valueOf(isLargeChanges));
+
+                if (isLargeChanges) {
+                    textview_lag.setText(String.format("%d", diff));
+
+                    isStabilised = false;
+                    calibratePressed = false;
+                    AccelerometerReading reading = new AccelerometerReading(timestamp, ax, ay, az);
+                    //Starts asyncTask to write to database
+                    WriteToDatabaseTask task = new WriteToDatabaseTask(this);
+                    task.execute(reading);
+                }
 
             }
+
         }
 
+    }
+
+    // Returns true if at least n out of 3 of ax, ay or az deviates from their normal range
+    private Boolean detectLargeChange(double curr_ax, double curr_ay, double curr_az) {
+        int countLargeChanges = 0;
+
+        if (curr_ax < minX || curr_ax > maxX){
+            countLargeChanges++;
+        }
+        if (curr_ay < minY || curr_ay > maxY){
+            countLargeChanges++;
+        }
+        if (curr_az < minZ || curr_az > maxZ){
+            countLargeChanges++;
+        }
+        return countLargeChanges >= THRESHOLD_NUM_AXES_WITH_LARGE_CHANGES; //
     }
 
     @Override
@@ -145,12 +197,12 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
 
     }
 
-    public void view_acc_log(View view){
+    public void view_acc_log(View view) {
         Intent intent = new Intent(this, AccelerometerDBLog.class);
         startActivity(intent);
     }
 
-    class WriteToDatabaseTask extends AsyncTask<AccelerometerReading, Void, Long>{
+    class WriteToDatabaseTask extends AsyncTask<AccelerometerReading, Void, Long> {
         private Context ctx;
 
         public WriteToDatabaseTask(Context ctx) {
@@ -161,7 +213,7 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
         protected Long doInBackground(AccelerometerReading... params) {
             //Get DBHelper to write to database
             SensorDBHelper helper = new SensorDBHelper(ctx);
-            SQLiteDatabase db = helper.getWritableDatabase();
+            SQLiteDatabase db     = helper.getWritableDatabase();
 
             if (params.length == 0) {
                 return null;
@@ -176,7 +228,6 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
             values.put(SensorsContract.AccelerometerEntry.COLUMN_AY, reading.getAy());
             values.put(SensorsContract.AccelerometerEntry.COLUMN_AZ, reading.getAz());
 
-
             //Insert the values into the Table for Tasks
             db.insertWithOnConflict(
                     SensorsContract.AccelerometerEntry.TABLE_NAME,
@@ -188,11 +239,11 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
 
         }
 
-        @Override
-        protected void onPostExecute(Long aLong) {
-            super.onPostExecute(aLong);
-            textview_lag.setText(String.valueOf(aLong));
-
-        }
+//        @Override
+//        protected void onPostExecute(Long aLong) {
+//            super.onPostExecute(aLong);
+//            textview_lag.setText(String.valueOf(aLong));
+//
+//        }
     }
 }

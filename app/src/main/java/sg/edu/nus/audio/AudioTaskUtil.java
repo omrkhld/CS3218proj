@@ -20,7 +20,7 @@ public class AudioTaskUtil
     public static void appendToStartOfLog(TextView log, String appendThis)
     {
         String currentLog = log.getText().toString();
-        currentLog = appendThis + "\n" + currentLog;
+        currentLog = currentLog + "\n" + appendThis;
         log.setText(currentLog);
     }
 

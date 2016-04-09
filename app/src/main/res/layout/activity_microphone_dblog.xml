@@ -8,13 +8,13 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="sg.edu.nus.accelerometer.AccelerometerDBLog"
+    tools:context="sg.edu.nus.audio.MicrophoneDBLog"
     android:orientation="vertical">
 
     <ListView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:id="@+id/listview_acc_log"
+        android:id="@+id/listview_audio_log"
         android:layout_weight="9"></ListView>
 
     <Button

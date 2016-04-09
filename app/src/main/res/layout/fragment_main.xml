@@ -34,12 +34,12 @@
         android:id="@+id/textView_calibrate"
         android:gravity="center_vertical"/>
 
-    <Button
-        android:id="@+id/button_all_sensors_together"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="all_sensors"
-        android:text="@string/ALL_SENSORS"/>
+    <!--<Button-->
+        <!--android:id="@+id/button_all_sensors_together"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:onClick="all_sensors"-->
+        <!--android:text="@string/ALL_SENSORS"/>-->
 
     <Button
         android:id="@+id/button_accelerometer"
@@ -76,7 +76,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="go_to_microphone"
-        android:text="@string/testing"/>
+        android:text="@string/all_sensors"/>
 
 
 </LinearLayout>

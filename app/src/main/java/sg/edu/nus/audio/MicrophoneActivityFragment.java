@@ -1,6 +1,8 @@
 package sg.edu.nus.audio;
 
 import android.content.Context;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -11,10 +13,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import sg.edu.nus.audio.AudioClipListener;
-import sg.edu.nus.audio.AudioRecorder;
-import sg.edu.nus.audio.AudioTaskUtil;
-import sg.edu.nus.audio.LoudNoiseDetector;
 import sg.edu.nus.oztrafficcamera.R;
 
 /**
@@ -38,6 +36,9 @@ public class MicrophoneActivityFragment extends Fragment {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        ToneGenerator toneG = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
+                        toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200);
+
                         RecordAudioTask task = new RecordAudioTask(getActivity(), status, log, "Microphone");
                         task.execute(new LoudNoiseDetector());
                     }
@@ -57,6 +58,8 @@ public class MicrophoneActivityFragment extends Fragment {
         private Context  context;
         private String   taskName;
 
+        private long startTime = 0;
+
         private static final String TEMP_AUDIO_DIR_NAME = "temp_audio";
 
         public RecordAudioTask(Context context, TextView status, TextView log, String taskName) {
@@ -69,7 +72,8 @@ public class MicrophoneActivityFragment extends Fragment {
         @Override
         protected void onPreExecute() {
             // Tell UI that recording is starting
-            textview_status_recording.setText(context.getResources().getString(R.string.audio_status_recording));
+            textview_status_recording.setText(context.getResources().getString(
+                    R.string.audio_status_recording));
             super.onPreExecute();
         }
 
@@ -84,8 +88,8 @@ public class MicrophoneActivityFragment extends Fragment {
 
                 boolean heard = false;
                 try {
+                    startTime = System.currentTimeMillis();
                     heard = recorder.startRecording();
-                    publishProgress(heard);
                 }
               /*  catch (IOException io){
                     Log.e(LOG_TAG, "Failed to record", io);
@@ -93,7 +97,7 @@ public class MicrophoneActivityFragment extends Fragment {
                 } */ catch (IllegalStateException ise) {
                     Log.e(LOG_TAG, "Failed to record, recorder not setup properly", ise);
                     heard = false;
-                } catch (RuntimeException se){
+                } catch (RuntimeException se) {
                     Log.e(LOG_TAG, "Failed to record, recorder is already being used", se);
                     heard = false;
                 }
@@ -101,23 +105,16 @@ public class MicrophoneActivityFragment extends Fragment {
                 return heard;
             }
         }
-        @Override
-        protected void onProgressUpdate(Boolean... values) {
-            //Log.d("MyAsyncTask","onProgressUpdate - " + values[0]);
-            if (values[0]) {
-                AudioTaskUtil.appendToStartOfLog(log, "Recording");
-            } else {
-                AudioTaskUtil.appendToStartOfLog(log, "Waiting for sound");
-            }
-        }
 
         @Override
         protected void onPostExecute(Boolean result) {
             if (result){
-                AudioTaskUtil.appendToStartOfLog(log, "Heard clap at " +
-                        AudioTaskUtil.getNow());
+                long heardTimestamp = System.currentTimeMillis();
+                long diff = heardTimestamp - startTime;
+                AudioTaskUtil.appendToStartOfLog(log, "Heard beep at " +
+                        AudioTaskUtil.getNow() + ", Lag is " + diff);
             } else {
-                AudioTaskUtil.appendToStartOfLog(log, "Heard no claps");
+                AudioTaskUtil.appendToStartOfLog(log, "Heard no beeps");
             }
             setDoneMessage();
             super.onPostExecute(result);
