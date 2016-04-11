@@ -159,6 +159,7 @@ public class CameraFragment extends Fragment
      */
     private Size mPreviewSize;
 
+
     /**
      * {@link CameraDevice.StateCallback} is called when {@link CameraDevice} changes its state.
      */
