@@ -47,9 +47,9 @@ public class MicrophoneDBLog extends AppCompatActivity {
                 R.layout.log_mic_view,
                 cursor,
                 new String[]{SensorsContract.MicrophoneEntry.COLUMN_TIMESTAMP,
-                        SensorsContract.MicrophoneEntry.COLUMN_AUDIO_SAMPLE},
+                SensorsContract.MicrophoneEntry._ID},
                 new int[]{R.id.log_mic_textview_timestamp,
-                        R.id.log_mic_textview_audiosample},
+                R.id.log_mic_id},
                 0
         );
 

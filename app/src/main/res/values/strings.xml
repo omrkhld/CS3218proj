@@ -9,6 +9,7 @@
     <string name="title_activity_microphone">MicrophoneActivity</string>
 
     <string name="START_MICROPHONE">START MICROPHONE</string>
+    <string name="STOP_MICROPHONE">STOP MICROPHONE</string>
     <string name="audio_status_recording">Starting to Record</string>
     <string name="audio_status_stopped">Stopped recording</string>
     <string name="title_activity_accelerometer">AccelerometerActivity</string>
@@ -18,5 +19,8 @@
     <string name="all_sensors">All Sensors</string>
     <string name="testing">Testing</string>
     <string name="VIEW_MIC_LOG">View Log</string>
+    <string name="play_audio">Play Audio</string>
     <string name="clear_log">Clear log</string>
+    <string name="STOP_RECORDING">Stop Recording</string>
+    <string name="START_RECORDING">Start Recording</string>
 </resources>
