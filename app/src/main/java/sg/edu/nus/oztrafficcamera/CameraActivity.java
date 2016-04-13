@@ -1,27 +1,14 @@
 package sg.edu.nus.oztrafficcamera;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.hardware.Camera;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Looper;
 import android.util.Log;
-import android.view.Menu;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.TextView;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CameraActivity extends Activity {
     private static final String TAG = "CameraActivity";
@@ -88,8 +75,19 @@ public class CameraActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
+        releaseCameraAndPreview();
+        try {
+            mCamera = Camera.open();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
 
-        mCamera = Camera.open();
+    private void releaseCameraAndPreview(){
+       if (mCamera!=null){
+           mCamera.release();
+           mCamera = null;
+       }
     }
 
     private Camera.PreviewCallback previewCallback = new Camera.PreviewCallback() {
