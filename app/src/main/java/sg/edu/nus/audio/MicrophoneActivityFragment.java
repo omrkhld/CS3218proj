@@ -20,6 +20,11 @@ import sg.edu.nus.oztrafficcamera.R;
  */
 public class MicrophoneActivityFragment extends Fragment {
 
+    private RecordAudioTask task;
+
+    Button b;
+    AudioRecorder recorder;
+
     public MicrophoneActivityFragment() {
     }
 
@@ -31,16 +36,28 @@ public class MicrophoneActivityFragment extends Fragment {
         final TextView log = (TextView) rootView.findViewById(R.id.textview_audio_log);
         setHasOptionsMenu(true);
 
-        Button b = (Button) rootView.findViewById(R.id.button_start_microphone);
+        b = (Button) rootView.findViewById(R.id.button_start_microphone);
         b.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        ToneGenerator toneG = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
-                        toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200);
+                            ToneGenerator toneG = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
+                            toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200);
 
-                        RecordAudioTask task = new RecordAudioTask(getActivity(), status, log, "Microphone");
-                        task.execute(new LoudNoiseDetector());
+                            task = new RecordAudioTask(getActivity(), status, log, "Microphone");
+                            task.execute(new LoudNoiseDetector());
+                            b.setText(R.string.STOP_RECORDING);
+
+                    }
+                }
+        );
+
+        Button stopButton = (Button) rootView.findViewById(R.id.button_stop_microphone);
+        stopButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        recorder.stopRecording();
                     }
                 }
         );
@@ -49,7 +66,7 @@ public class MicrophoneActivityFragment extends Fragment {
 
 
 
-    class RecordAudioTask extends AsyncTask<AudioClipListener, Boolean, Boolean> {
+    class RecordAudioTask extends AsyncTask<AudioClipListener, Long, Boolean> {
 
         private final String LOG_TAG = RecordAudioTask.class.getSimpleName();
 
@@ -84,7 +101,8 @@ public class MicrophoneActivityFragment extends Fragment {
             } else {
                 Log.d(LOG_TAG, "Recording");
                 AudioClipListener listener = listeners[0];
-                AudioRecorder recorder = new AudioRecorder(listener, this);
+                recorder = new AudioRecorder(listener, this, context);
+
 
                 boolean heard = false;
                 try {
@@ -107,6 +125,12 @@ public class MicrophoneActivityFragment extends Fragment {
         }
 
         @Override
+        protected void onProgressUpdate(Long... values) {
+            AudioTaskUtil.appendToStartOfLog(log, "Heard beep at " +
+                    AudioTaskUtil.getNow() + ", Lag is " + System.currentTimeMillis());
+        }
+
+        @Override
         protected void onPostExecute(Boolean result) {
             if (result){
                 long heardTimestamp = System.currentTimeMillis();
@@ -117,6 +141,7 @@ public class MicrophoneActivityFragment extends Fragment {
                 AudioTaskUtil.appendToStartOfLog(log, "Heard no beeps");
             }
             setDoneMessage();
+            b.setText(R.string.START_RECORDING);
             super.onPostExecute(result);
         }
 

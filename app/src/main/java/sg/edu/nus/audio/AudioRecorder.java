@@ -1,10 +1,20 @@
 package sg.edu.nus.audio;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
+import android.media.AudioTrack;
 import android.media.MediaRecorder;
-import android.os.AsyncTask;
 import android.util.Log;
+
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import sg.edu.nus.data.SensorDBHelper;
+import sg.edu.nus.data.SensorsContract;
 
 /**
  * Created by delvinlow on 10/3/16.
@@ -15,6 +25,7 @@ public class AudioRecorder {
 
     private AudioRecord       audioRecorder;
     private AudioClipListener audioClipListener;
+    String filePath = "/sdcard/Audio8k16bitMono.pcm";
 
     // A variable to control whether to record
     private boolean continueRecording;
@@ -27,22 +38,27 @@ public class AudioRecorder {
 
     private static final int DEFAULT_BUFFER_INCREASE_FACTOR = 3; //prevent overflow
 
-    private AsyncTask recordTask;
-    private boolean   heardCar;
+    Context context;
+
+    private MicrophoneActivityFragment.RecordAudioTask recordTask;
+    private boolean                                    heardBeep;
+
+    AudioTrack mAudioTrack;
 
     public double heardVolume = 0;
 
     public AudioRecorder(AudioClipListener clipListener) {
         this.audioClipListener = clipListener;
-        heardCar = false;
+        heardBeep = false;
         recordTask = null;
     }
 
-    public AudioRecorder(AudioClipListener clipListener, AsyncTask task) {
+    public AudioRecorder(AudioClipListener clipListener, MicrophoneActivityFragment.RecordAudioTask task, Context ctx) {
 //        this.clipListener = clipListener;
-//        heardCar = false;
+//        heardBeep = false;
         this(clipListener);
         recordTask = task;
+        this.context = ctx;
     }
 
     public boolean startRecording() {
@@ -99,51 +115,118 @@ public class AudioRecorder {
             Log.d(TAG, "Start recording, " + "recordBufferSize : " + increasedRecordBufferSize
                     + " readBufferSize: " + readBufferSize);
 
+
+            //Create file to save to
+
+            FileOutputStream os = null;
+            try {
+                os = new FileOutputStream(filePath);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+
+//            int bufferSize = AudioTrack.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT);
+//
+//            mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize, AudioTrack.MODE_STREAM);
+//            mAudioTrack.play();
+
+            Long startTime = System.currentTimeMillis();
+            Long beepDetectedTime = 0L;
             audioRecorder.startRecording(); //TODO: possible IllegalStateException if audio is already recording
 
-
-            while (continueRecording){
+            while (continueRecording) {
                 // Reads audio data from the audio hardware for recording into a byte array. Offset 0, number of requested bytes
-                int bufferResult = audioRecorder.read(readBuffer, 0 , readBufferSize);
+                int bufferResult = audioRecorder.read(readBuffer, 0, readBufferSize);
 
-
-                if (!continueRecording || recordTask == null && recordTask.isCancelled()){ //Returns true if this task was cancelled before it completed normally, e.g calling cancel()
+                if (!continueRecording || recordTask == null && recordTask.isCancelled()) { //Returns true if this task was cancelled before it completed normally, e.g calling cancel()
                     break;
-                } else if (bufferResult == AudioRecord.ERROR_INVALID_OPERATION){
+                } else if (bufferResult == AudioRecord.ERROR_INVALID_OPERATION) {
                     // Denotes a failure due to the improper use of a method.
                     Log.e(TAG, "Error reading: ERROR_INVALID_OPERATION");
                 } else {
                     // No error, start processing
-                    heardCar = audioClipListener.heard(readBuffer, sampleRate); // If return true, stop recording.
+                    heardBeep = audioClipListener.heard(readBuffer, sampleRate); // If return true, compute time lag.
+
                     heardVolume = audioClipListener.currentVolume;
 
-                    //Write readBuffer to database
-                    
-                    if (heardCar) {
-                        stopRecording();
-
+                    if (heardBeep && beepDetectedTime == 0L) {
+                        beepDetectedTime = System.currentTimeMillis();
                         //Measure time lag between now and start
-
+                        Long lag = beepDetectedTime - startTime;
+                        Log.v("Time lag is ", String.valueOf(lag));
                         // But dont stop, wait for external to cancel.
+//                        stopRecording();
                     }
+
+                    try {
+                        // writes the data to file from buffer stores the voice buffer
+                        byte[] bData = short2byte(readBuffer);
+
+                        // to turn shorts to bytes.
+//                        byte[] bytes2 = new byte[readBuffer.length * 2];
+//                        ByteBuffer.wrap(bytes2).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().put(readBuffer);
+
+                        SensorDBHelper helper = new SensorDBHelper(context);
+                        SQLiteDatabase db     = helper.getWritableDatabase();
+
+                        ContentValues values = new ContentValues();
+                        values.clear();
+                        values.put(SensorsContract.MicrophoneEntry.COLUMN_TIMESTAMP, System.currentTimeMillis());
+                        values.put(SensorsContract.MicrophoneEntry.COLUMN_AUDIO_SAMPLE, bData);
+
+                        //Insert the values into the Table for Tasks
+                        db.insertWithOnConflict(
+                                SensorsContract.MicrophoneEntry.TABLE_NAME,
+                                null,
+                                values,
+                                SQLiteDatabase.CONFLICT_IGNORE);
+
+                        os.write(bData, 0, readBufferSize * 2); //Because 2 bytes each for 16 bits format
+//                        mAudioTrack.write(bData, 0, bData.length);
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+
                 }
             }
+            try {
+                os.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
         doneRecording();
         return true;
     }
 
-    public void stopRecording(){
+    public void stopRecording() {
         continueRecording = false;
     }
 
-    public void doneRecording(){
+    public void doneRecording() {
         Log.d(TAG, "Done recording, shutting down recorder");
-        if (audioRecorder != null){
+        if (audioRecorder != null) {
             audioRecorder.stop(); //stop recording
             audioRecorder.release(); //Releases the native AudioRecord resources. The object can no longer be used and the reference should be set to null after a call to release()
             audioRecorder = null;
         }
     }
+
+    //Conversion of short to byte to write to database
+    private byte[] short2byte(short[] sData) {
+        int    shortArrSize = sData.length;
+        byte[] bytes        = new byte[shortArrSize * 2];
+
+        for (int i = 0; i < shortArrSize; i++) {
+            bytes[i * 2] = (byte) (sData[i] & 0x00FF);
+            bytes[(i * 2) + 1] = (byte) (sData[i] >> 8);
+            sData[i] = 0;
+        }
+        return bytes;
+    }
+
 
 }
