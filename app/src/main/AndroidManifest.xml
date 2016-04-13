@@ -9,6 +9,8 @@
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application
         android:allowBackup="true"
@@ -32,6 +34,22 @@
             android:parentActivityName=".MainActivity">
         </activity>
 
+        <activity
+            android:name="sg.edu.nus.audio.MicrophoneActivity"
+            android:label="@string/title_activity_microphone"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity android:name=".BlankActivity">
+        </activity>
+        <activity
+            android:name="sg.edu.nus.accelerometer.AccelerometerActivity"
+            android:label="@string/title_activity_accelerometer"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity android:name="sg.edu.nus.accelerometer.AccelerometerDBLog">
+        </activity>
+        <activity android:name="sg.edu.nus.audio.MicrophoneDBLog">
+        </activity>
     </application>
 
 </manifest>
