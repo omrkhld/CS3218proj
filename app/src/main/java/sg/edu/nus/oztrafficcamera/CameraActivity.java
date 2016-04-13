@@ -17,6 +17,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -28,10 +29,12 @@ public class CameraActivity extends Activity {
     private Camera mCamera;
     private SurfaceView mPreview;
     private Button captureButton;
+    private TextView lagTimeText;
+    private TextView numPhotosText;
     private static SurfaceHolder previewHolder = null;
     private static boolean isStarted = false;
     private static boolean inPreview = false;
-    private int pictureDelay = 3000;
+    private int pictureDelay = 2000;
     private int numPhotos = 0;
     private static long mReferenceTime = 0;
     private CaptureThread thread;
@@ -50,6 +53,9 @@ public class CameraActivity extends Activity {
         previewHolder.addCallback(surfaceCallback);
         previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
+        lagTimeText = (TextView) findViewById(R.id.lag_time);
+        numPhotosText = (TextView) findViewById(R.id.num_photos);
+
         // Add a listener to the Capture button
         captureButton = (Button) findViewById(R.id.capture_button);
         captureButton.setOnClickListener(new View.OnClickListener() {
@@ -58,18 +64,9 @@ public class CameraActivity extends Activity {
                 if (isStarted) {
                     captureButton.setText("Capture");
                     isStarted = false;
-                    thread.interrupt();
                 } else {
-                    captureButton.setText("Stop");
                     isStarted = true;
-                    while (isStarted) {
-                        long now = System.currentTimeMillis();
-                        if (now > (mReferenceTime + pictureDelay)) {
-                            mReferenceTime = now;
-                            CaptureThread thread = new CaptureThread();
-                            thread.start();
-                        }
-                    }
+                    captureButton.setText("Stop");
                 }
             }
         });
@@ -99,6 +96,15 @@ public class CameraActivity extends Activity {
             if (data == null) return;
             Camera.Size size = cam.getParameters().getPreviewSize();
             if (size == null) return;
+
+            if (isStarted) {
+                long now = System.currentTimeMillis();
+                if (now > (mReferenceTime + pictureDelay)) {
+                    mReferenceTime = now;
+                    CaptureThread thread = new CaptureThread();
+                    thread.start();
+                }
+            }
         }
     };
 
