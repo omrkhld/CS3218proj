@@ -2,6 +2,9 @@
 <manifest package="sg.edu.nus.oztrafficcamera"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- This app records A/V content from camera and stores it to disk -->
+    <uses-permission android:name="android.permission.RECORD_VIDEO" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
@@ -29,7 +32,6 @@
             android:parentActivityName=".MainActivity">
         </activity>
 
-        <activity android:name=".SensorsActivity"/>
     </application>
 
 </manifest>

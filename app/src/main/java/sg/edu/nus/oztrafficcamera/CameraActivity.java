@@ -1,5 +1,8 @@
 package sg.edu.nus.oztrafficcamera;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.hardware.Camera;
@@ -8,62 +11,86 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Looper;
 import android.util.Log;
+import android.view.Menu;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.widget.Button;
+import android.widget.FrameLayout;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.prefs.Preferences;
 
-public class CameraActivity extends SensorsActivity {
+public class CameraActivity extends Activity {
     private static final String TAG = "CameraActivity";
 
-    private static SurfaceView preview = null;
+    private Camera mCamera;
+    private SurfaceView mPreview;
+    private Button captureButton;
     private static SurfaceHolder previewHolder = null;
-    private static Camera camera = null;
+    private static boolean isStarted = false;
     private static boolean inPreview = false;
+    private int pictureDelay = 3000;
+    private int numPhotos = 0;
     private static long mReferenceTime = 0;
-    private static RgbMotionDetection detector = new RgbMotionDetection();
-    public static int pictureDelay = 5000;
-    public static boolean savePrevious = true;
-    public static boolean saveOriginal = true;
-    public static boolean saveChanges = true;
-
-    private static volatile AtomicBoolean processing = new AtomicBoolean(false);
+    private CaptureThread thread;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_camera);
+        setContentView(R.layout.activity_camera);
 
-        preview = (SurfaceView) findViewById(R.id.preview);
-        previewHolder = preview.getHolder();
+        // Create an instance of Camera
+        mCamera = getCameraInstance();
+
+        // Create our Preview view and set it as the content of our activity.
+        mPreview = (SurfaceView) findViewById(R.id.preview);
+        previewHolder = mPreview.getHolder();
         previewHolder.addCallback(surfaceCallback);
         previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-    }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
+        // Add a listener to the Capture button
+        captureButton = (Button) findViewById(R.id.capture_button);
+        captureButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isStarted) {
+                    captureButton.setText("Capture");
+                    isStarted = false;
+                    thread.interrupt();
+                } else {
+                    captureButton.setText("Stop");
+                    isStarted = true;
+                    while (isStarted) {
+                        long now = System.currentTimeMillis();
+                        if (now > (mReferenceTime + pictureDelay)) {
+                            mReferenceTime = now;
+                            CaptureThread thread = new CaptureThread();
+                            thread.start();
+                        }
+                    }
+                }
+            }
+        });
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
-        camera.setPreviewCallback(null);
-        if (inPreview) camera.stopPreview();
+        mCamera.setPreviewCallback(null);
+        if (inPreview) mCamera.stopPreview();
         inPreview = false;
-        camera.release();
-        camera = null;
+        mCamera.release();
+        mCamera = null;
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
-        camera = Camera.open();
+        mCamera = Camera.open();
     }
 
     private Camera.PreviewCallback previewCallback = new Camera.PreviewCallback() {
@@ -72,11 +99,6 @@ public class CameraActivity extends SensorsActivity {
             if (data == null) return;
             Camera.Size size = cam.getParameters().getPreviewSize();
             if (size == null) return;
-
-            if (!GlobalData.isPhoneInMotion()) {
-                DetectionThread thread = new DetectionThread(data, size.width, size.height);
-                thread.start();
-            }
         }
     };
 
@@ -85,8 +107,8 @@ public class CameraActivity extends SensorsActivity {
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
             try {
-                camera.setPreviewDisplay(previewHolder);
-                camera.setPreviewCallback(previewCallback);
+                mCamera.setPreviewDisplay(previewHolder);
+                mCamera.setPreviewCallback(previewCallback);
             } catch (Throwable t) {
                 Log.e("surfaceCallback", "Exception in setPreviewDisplay()", t);
             }
@@ -94,14 +116,14 @@ public class CameraActivity extends SensorsActivity {
 
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-            Camera.Parameters parameters = camera.getParameters();
+            Camera.Parameters parameters = mCamera.getParameters();
             Camera.Size size = getBestPreviewSize(width, height, parameters);
             if (size != null) {
                 parameters.setPreviewSize(size.width, size.height);
                 Log.d(TAG, "Using width=" + size.width + " height=" + size.height);
             }
-            camera.setParameters(parameters);
-            camera.startPreview();
+            mCamera.setParameters(parameters);
+            mCamera.startPreview();
             inPreview = true;
         }
 
@@ -129,100 +151,34 @@ public class CameraActivity extends SensorsActivity {
         return result;
     }
 
-    private static final class DetectionThread extends Thread {
-        private byte[] data;
-        private int width;
-        private int height;
-
-        public DetectionThread(byte[] data, int width, int height) {
-            this.data = data;
-            this.width = width;
-            this.height = height;
+    /** A safe way to get an instance of the Camera object. */
+    public static Camera getCameraInstance() {
+        Camera c = null;
+        try {
+            c = Camera.open(); // attempt to get a Camera instance
+        } catch (Exception e) {
+            // Camera is not available (in use or does not exist)
         }
+        return c; // returns null if camera is unavailable
+    }
 
+    private class CaptureThread extends Thread {
         @Override
         public void run() {
-            if (!processing.compareAndSet(false, true)) return;
-            Log.d(TAG, "BEGIN PROCESSING...");
-            try {
-                // Previous frame
-                int[] pre = null;
-                if (savePrevious) pre = detector.getPrevious();
-
-                // Current frame (with changes)
-                long bConversion = System.currentTimeMillis();
-                int[] img = null;
-                img = ImageProcessing.decodeYUV420SPtoRGB(data, width, height);
-                long aConversion = System.currentTimeMillis();
-                Log.d(TAG, "Conversion="+(aConversion-bConversion));
-
-                // Current frame (without changes)
-                int[] org = null;
-                if (saveOriginal && img != null) org = img.clone();
-
-                if (img != null && detector.detect(img, width, height)) {
-                    // The delay is necessary to avoid taking a picture while in the
-                    // middle of taking another. This problem can causes some phones to reboot.
-                    long now = System.currentTimeMillis();
-                    if (now > (mReferenceTime + pictureDelay)) {
-                        mReferenceTime = now;
-
-                        Bitmap previous = null;
-                        if (savePrevious && pre != null) {
-                            previous = ImageProcessing.rgbToBitmap(pre, width, height);
-                        }
-
-                        Bitmap original = null;
-                        if (saveOriginal && org != null) {
-                            original = ImageProcessing.rgbToBitmap(org, width, height);
-                        }
-
-                        Bitmap bitmap = null;
-                        if (saveChanges) {
-                            bitmap = ImageProcessing.rgbToBitmap(img, width, height);
-                        }
-
-                        Log.i(TAG, "Saving previous=" + previous + " original=" + original + " bitmap=" + bitmap);
-                        Looper.prepare();
-                        new SavePhotoTask().execute(previous, original, bitmap);
-                    } else {
-                        Log.i(TAG, "Not taking picture because not enough time has passed since the creation of the Surface");
-                    }
+            Camera.PictureCallback mPicture = new Camera.PictureCallback() {
+                @Override
+                public void onPictureTaken(byte[] data, Camera camera) {
+                    new MediaSaver().execute(data);
+                    mCamera.startPreview();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                processing.set(false);
-            }
-            Log.d(TAG, "END PROCESSING...");
+            };
 
-            processing.set(false);
-        }
-    };
-
-    private static final class SavePhotoTask extends AsyncTask<Bitmap, Integer, Integer> {
-        @Override
-        protected Integer doInBackground(Bitmap... data) {
-            for (int i = 0; i < data.length; i++) {
-                Bitmap bitmap = data[i];
-                String name = String.valueOf(System.currentTimeMillis());
-                Log.d(TAG, "Saving photo name: " + name);
-                if (bitmap != null) save(name, bitmap);
-            }
-            return 1;
-        }
-
-        private void save(String name, Bitmap bitmap) {
-            File photo = new File(Environment.getExternalStorageDirectory(), name + ".jpg");
-            if (photo.exists()) photo.delete();
-
-            try {
-                FileOutputStream fos = new FileOutputStream(photo.getPath());
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-                fos.close();
-            } catch (java.io.IOException e) {
-                Log.e("PictureDemo", "Exception in photoCallback", e);
-            }
+            long startTime = System.currentTimeMillis();
+            mCamera.takePicture(null, null, mPicture);
+            numPhotos++;
+            long endTime = System.currentTimeMillis();
+            Log.d(TAG, "Num photos taken = " + numPhotos);
+            Log.d(TAG, "Lag = " + (endTime - startTime));
         }
     }
 }
