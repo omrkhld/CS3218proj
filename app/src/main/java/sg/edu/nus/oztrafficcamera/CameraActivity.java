@@ -36,6 +36,8 @@ public class CameraActivity extends Activity {
     private static boolean inPreview = false;
     private int pictureDelay = 2000;
     private int numPhotos = 0;
+    private long startTime = 0;
+    private long endTime = 0;
     private static long mReferenceTime = 0;
     private CaptureThread thread;
 
@@ -179,12 +181,20 @@ public class CameraActivity extends Activity {
                 }
             };
 
-            long startTime = System.currentTimeMillis();
+            startTime = System.currentTimeMillis();
             mCamera.takePicture(null, null, mPicture);
             numPhotos++;
-            long endTime = System.currentTimeMillis();
+            endTime = System.currentTimeMillis();
             Log.d(TAG, "Num photos taken = " + numPhotos);
             Log.d(TAG, "Lag = " + (endTime - startTime));
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    lagTimeText.setText(String.valueOf(endTime - startTime));
+                    numPhotosText.setText(String.valueOf(numPhotos));
+                }
+            });
         }
     }
 }

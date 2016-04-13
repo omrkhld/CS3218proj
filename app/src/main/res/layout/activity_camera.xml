@@ -20,6 +20,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textColor="@android:color/white"
         android:text="Lag: "/>
 
     <TextView
@@ -27,12 +28,14 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="28dp"
         android:id="@+id/lag_time"
+        android:textColor="@android:color/white"
         android:text="0"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
+        android:textColor="@android:color/white"
         android:text="Num photos: " />
 
     <TextView
@@ -41,6 +44,7 @@
         android:layout_marginLeft="81dp"
         android:layout_marginTop="15dp"
         android:id="@+id/num_photos"
+        android:textColor="@android:color/white"
         android:text="0"/>
 
 
