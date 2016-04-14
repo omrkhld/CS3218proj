@@ -69,9 +69,7 @@ public class MicrophoneActivityFragment extends Fragment {
         return rootView;
     }
 
-
-
-    class RecordAudioTask extends AsyncTask<AudioClipListener, Long, Boolean> {
+    class RecordAudioTask extends AsyncTask<AudioClipListener, Long, DetailsOfRecording> {
 
         private final String LOG_TAG = RecordAudioTask.class.getSimpleName();
 
@@ -81,8 +79,6 @@ public class MicrophoneActivityFragment extends Fragment {
         private String   taskName;
 
         private long startTime = 0;
-
-        private static final String TEMP_AUDIO_DIR_NAME = "temp_audio";
 
         public RecordAudioTask(Context context, TextView status, TextView log, String taskName) {
             this.context = context;
@@ -100,48 +96,37 @@ public class MicrophoneActivityFragment extends Fragment {
         }
 
         @Override
-        protected Boolean doInBackground(AudioClipListener... listeners) {
+        protected DetailsOfRecording doInBackground(AudioClipListener... listeners) {
+            DetailsOfRecording recordingDetails = new DetailsOfRecording();
+
             if (listeners.length == 0) {
-                return false;
+                return recordingDetails;
             } else {
                 Log.d(LOG_TAG, "Recording");
                 AudioClipListener listener = listeners[0];
                 recorder = new AudioRecorder(listener, this, context);
 
-
                 boolean heard = false;
                 try {
                     startTime = System.currentTimeMillis();
-                    heard = recorder.startRecording();
-                }
-              /*  catch (IOException io){
-                    Log.e(LOG_TAG, "Failed to record", io);
-                    heard = false;
-                } */ catch (IllegalStateException ise) {
+                    recordingDetails = recorder.startRecording();
+                } catch (IllegalStateException ise) {
                     Log.e(LOG_TAG, "Failed to record, recorder not setup properly", ise);
-                    heard = false;
                 } catch (RuntimeException se) {
                     Log.e(LOG_TAG, "Failed to record, recorder is already being used", se);
-                    heard = false;
                 }
 
-                return heard;
+                return recordingDetails;
             }
         }
 
-        @Override
-        protected void onProgressUpdate(Long... values) {
-            AudioTaskUtil.appendToStartOfLog(log, "Heard beep at " +
-                    AudioTaskUtil.getNow() + ", Lag is " + System.currentTimeMillis());
-        }
 
         @Override
-        protected void onPostExecute(Boolean result) {
-            if (result){
-                long heardTimestamp = System.currentTimeMillis();
-                long diff = heardTimestamp - startTime;
-                AudioTaskUtil.appendToStartOfLog(log, "Heard beep at " +
-                        AudioTaskUtil.getNow() + ", Lag is " + diff);
+        protected void onPostExecute(DetailsOfRecording result) {
+            if (result.successRecording){
+                long lag = result.lag;
+                long duration = result.endTime - result.startTime;
+                AudioTaskUtil.appendToStartOfLog(log, "Lag was " + lag + ", Recorded duration is " + duration);
             } else {
                 AudioTaskUtil.appendToStartOfLog(log, "Heard no beeps");
             }

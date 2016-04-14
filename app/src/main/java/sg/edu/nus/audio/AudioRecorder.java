@@ -61,7 +61,7 @@ public class AudioRecorder {
         this.context = ctx;
     }
 
-    public boolean startRecording() {
+    public DetailsOfRecording startRecording() {
         return startRecording(RECORDER_SAMPLE_RATE_8000, AudioFormat.ENCODING_PCM_16BIT);
     }
 
@@ -72,7 +72,7 @@ public class AudioRecorder {
      * @param encoding   How many bits to use per audio sample
      * @return whether successful
      */
-    public boolean startRecording(final int sampleRate, int encoding) {
+    public DetailsOfRecording startRecording(final int sampleRate, int encoding) {
         int recordBufferSize = computeMinBufferSizeInBytes(sampleRate, encoding);
         int readBufferSize   = recordBufferSize;
         return doRecording(sampleRate, encoding, recordBufferSize, readBufferSize, DEFAULT_BUFFER_INCREASE_FACTOR);
@@ -90,16 +90,20 @@ public class AudioRecorder {
         return minBufferSize;
     }
 
-    public boolean doRecording(final int sampleRate, int encoding, int recordBufferSize,
+    public DetailsOfRecording doRecording(final int sampleRate, int encoding, int recordBufferSize,
                                int readBufferSize,
                                final int factorToIncreaseBuffer) {
+        DetailsOfRecording details = new DetailsOfRecording();
 
         // A failure due to the use of an invalid value or recording parameters are not
         // supported by the hardware
         if (recordBufferSize == AudioRecord.ERROR_BAD_VALUE) {
-            return false;
+            details.successRecording = false;
+            return details;
+
         } else if (recordBufferSize == AudioRecord.ERROR) { // Unable to query the hardware for its input properties
-            return false; //stub
+            details.successRecording = false;
+            return details;
         } else {
             int increasedRecordBufferSize = factorToIncreaseBuffer * recordBufferSize;
 
@@ -125,14 +129,8 @@ public class AudioRecorder {
                 e.printStackTrace();
             }
 
-//            int bufferSize = AudioTrack.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT);
-//
-//            mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize, AudioTrack.MODE_STREAM);
-//            mAudioTrack.play();
-
-            Long startTime = System.currentTimeMillis();
-            Long beepDetectedTime = 0L;
-            audioRecorder.startRecording(); //TODO: possible IllegalStateException if audio is already recording
+            details.startTime = System.currentTimeMillis();
+            audioRecorder.startRecording();
 
             while (continueRecording) {
                 // Reads audio data from the audio hardware for recording into a byte array. Offset 0, number of requested bytes
@@ -147,24 +145,19 @@ public class AudioRecorder {
                     // No error, start processing
                     heardBeep = audioClipListener.heard(readBuffer, sampleRate); // If return true, compute time lag.
 
-                    heardVolume = audioClipListener.currentVolume;
-
-                    if (heardBeep && beepDetectedTime == 0L) {
-                        beepDetectedTime = System.currentTimeMillis();
+                    if (heardBeep && details.beepDetectedTime == 0L) {
+                        details.beepDetectedTime = System.currentTimeMillis();
                         //Measure time lag between now and start
-                        Long lag = beepDetectedTime - startTime;
+                        long lag = details.beepDetectedTime - details.startTime;
+                        details.lag = lag;
                         Log.v("Time lag is ", String.valueOf(lag));
                         // But dont stop, wait for external to cancel.
-//                        stopRecording();
+                        // stopRecording();
                     }
 
                     try {
                         // writes the data to file from buffer stores the voice buffer
                         byte[] bData = short2byte(readBuffer);
-
-                        // to turn shorts to bytes.
-//                        byte[] bytes2 = new byte[readBuffer.length * 2];
-//                        ByteBuffer.wrap(bytes2).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().put(readBuffer);
 
                         SensorDBHelper helper = new SensorDBHelper(context);
                         SQLiteDatabase db     = helper.getWritableDatabase();
@@ -182,13 +175,9 @@ public class AudioRecorder {
                                 SQLiteDatabase.CONFLICT_IGNORE);
 
                         os.write(bData, 0, readBufferSize * 2); //Because 2 bytes each for 16 bits format
-//                        mAudioTrack.write(bData, 0, bData.length);
-
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-
-
                 }
             }
             try {
@@ -198,8 +187,10 @@ public class AudioRecorder {
             }
         }
 
+        details.endTime = System.currentTimeMillis();
+        details.successRecording = true;
         doneRecording();
-        return true;
+        return details;
     }
 
     public void stopRecording() {
