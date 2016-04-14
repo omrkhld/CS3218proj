@@ -10,12 +10,26 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="bottom">
     <Button
         android:text="Capture"
         android:id="@+id/capture_button"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"/>
+        android:layout_weight="1"/>
+
+        <Button
+            android:text="View log"
+            android:id="@+id/view_camera_log_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="view_cam_log"/>
+    </LinearLayout>
 
     <TextView
         android:layout_width="wrap_content"

@@ -2,6 +2,7 @@ package sg.edu.nus.oztrafficcamera;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.util.Log;
@@ -60,6 +61,11 @@ public class CameraActivity extends Activity {
                 }
             }
         });
+    }
+
+    public void view_cam_log(View view){
+        Intent intent = new Intent(this, CameraDBLog.class);
+        startActivity(intent);
     }
 
     @Override
