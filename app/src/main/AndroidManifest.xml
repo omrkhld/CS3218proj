@@ -31,7 +31,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".CameraActivity"
+            android:name="sg.edu.nus.camera.CameraActivity"
             android:configChanges="keyboardHidden|orientation"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="landscape">
@@ -52,7 +52,7 @@
         </activity>
         <activity android:name="sg.edu.nus.audio.MicrophoneDBLog">
         </activity>
-        <activity android:name=".CameraDBLog">
+        <activity android:name="sg.edu.nus.camera.CameraDBLog">
         </activity>
     </application>
 

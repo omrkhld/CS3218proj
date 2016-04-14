@@ -1,4 +1,4 @@
-package sg.edu.nus.oztrafficcamera;
+package sg.edu.nus.camera;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import sg.edu.nus.data.SensorDBHelper;
 import sg.edu.nus.data.SensorsContract;
+import sg.edu.nus.oztrafficcamera.R;
 
 /**
  * Created by delvinlow on 14/4/16.

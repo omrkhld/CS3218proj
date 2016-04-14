@@ -1,4 +1,4 @@
-package sg.edu.nus.oztrafficcamera;
+package sg.edu.nus.camera;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -10,6 +10,7 @@ import android.widget.ListView;
 
 import sg.edu.nus.data.SensorDBHelper;
 import sg.edu.nus.data.SensorsContract;
+import sg.edu.nus.oztrafficcamera.R;
 
 public class CameraDBLog extends AppCompatActivity {
     private ListAdapter listAdapter;

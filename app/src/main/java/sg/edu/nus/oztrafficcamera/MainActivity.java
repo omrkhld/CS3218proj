@@ -12,6 +12,7 @@ import android.view.View;
 
 import sg.edu.nus.accelerometer.AccelerometerActivity;
 import sg.edu.nus.audio.MicrophoneActivity;
+import sg.edu.nus.camera.CameraActivity;
 
 public class MainActivity extends AppCompatActivity {
 

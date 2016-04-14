@@ -1,4 +1,4 @@
-package sg.edu.nus.oztrafficcamera;
+package sg.edu.nus.camera;
 
 import android.annotation.SuppressLint;
 import android.content.ContentValues;

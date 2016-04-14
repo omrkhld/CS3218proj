@@ -1,4 +1,4 @@
-package sg.edu.nus.oztrafficcamera;
+package sg.edu.nus.camera;
 
 import android.app.Activity;
 import android.content.Context;
@@ -11,6 +11,8 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
+import sg.edu.nus.oztrafficcamera.R;
 
 public class CameraActivity extends Activity {
     private static final String TAG = "CameraActivity";
