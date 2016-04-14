@@ -26,9 +26,11 @@ public class MediaSaver extends AsyncTask<byte[], String, String> {
     private static final String TAG = "MediaSaver";
     static  String  timeStamp;
     private Context ctx;
+    long timestampPictureTaken = 0L;
 
-    public MediaSaver(Context ctx) {
+    public MediaSaver(Context ctx, Long timestamp) {
         this.ctx = ctx;
+        this.timestampPictureTaken = timestamp;
     }
 
     @Override
@@ -49,7 +51,7 @@ public class MediaSaver extends AsyncTask<byte[], String, String> {
             //Put in the values within a ContentValues.
             ContentValues values = new ContentValues();
             values.clear();
-            values.put(SensorsContract.CameraEntry.COLUMN_TIMESTAMP, timeStamp);
+            values.put(SensorsContract.CameraEntry.COLUMN_TIMESTAMP, timestampPictureTaken);
             values.put(SensorsContract.CameraEntry.COLUMN_IMAGE_URI, uri.getPath());
 
             //Insert the values into the Table for Tasks

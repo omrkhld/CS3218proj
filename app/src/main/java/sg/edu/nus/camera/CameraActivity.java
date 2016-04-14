@@ -188,7 +188,8 @@ public class CameraActivity extends Activity {
             Camera.PictureCallback mPicture = new Camera.PictureCallback() {
                 @Override
                 public void onPictureTaken(byte[] data, Camera camera) {
-                    new MediaSaver(ctx).execute(data);
+                    Long timestamp = System.currentTimeMillis();
+                    new MediaSaver(ctx, timestamp).execute(data);
                     mCamera.startPreview();
                 }
             };
