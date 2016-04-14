@@ -22,7 +22,7 @@ public class MicrophoneActivityFragment extends Fragment {
 
     private RecordAudioTask task;
 
-    Button b;
+    Button        startButton;
     AudioRecorder recorder;
 
     public MicrophoneActivityFragment() {
@@ -31,33 +31,38 @@ public class MicrophoneActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_microphone, container, false);
-        final TextView status = (TextView) rootView.findViewById(R.id.textview_audio_status);
-        final TextView log = (TextView) rootView.findViewById(R.id.textview_audio_log);
+        View           rootView = inflater.inflate(R.layout.fragment_microphone, container, false);
+        final TextView status   = (TextView) rootView.findViewById(R.id.textview_audio_status);
+        final TextView log      = (TextView) rootView.findViewById(R.id.textview_audio_log);
         setHasOptionsMenu(true);
 
-        b = (Button) rootView.findViewById(R.id.button_start_microphone);
-        b.setOnClickListener(
+        startButton = (Button) rootView.findViewById(R.id.button_start_microphone);
+        final Button stopButton = (Button) rootView.findViewById(R.id.button_stop_microphone);
+        stopButton.setEnabled(false);
+        startButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                            ToneGenerator toneG = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
-                            toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200);
+                        ToneGenerator toneG = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
+                        toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200);
 
-                            task = new RecordAudioTask(getActivity(), status, log, "Microphone");
-                            task.execute(new LoudNoiseDetector());
-                            b.setText(R.string.STOP_RECORDING);
+                        task = new RecordAudioTask(getActivity(), status, log, "Microphone");
+                        task.execute(new LoudNoiseDetector());
+                        startButton.setText(R.string.RECORDING);
+                        startButton.setEnabled(false);
+                        stopButton.setEnabled(true);
 
                     }
                 }
         );
 
-        Button stopButton = (Button) rootView.findViewById(R.id.button_stop_microphone);
         stopButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         recorder.stopRecording();
+                        startButton.setEnabled(true);
+                        stopButton.setEnabled(false);
                     }
                 }
         );
@@ -141,7 +146,7 @@ public class MicrophoneActivityFragment extends Fragment {
                 AudioTaskUtil.appendToStartOfLog(log, "Heard no beeps");
             }
             setDoneMessage();
-            b.setText(R.string.START_RECORDING);
+            startButton.setText(R.string.START_RECORDING);
             super.onPostExecute(result);
         }
 
