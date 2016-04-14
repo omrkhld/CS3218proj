@@ -58,8 +58,6 @@ public class MicrophoneActivity extends AppCompatActivity {
             dis.close();
             fin.close();
 
-
-
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

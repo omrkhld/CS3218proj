@@ -1,4 +1,4 @@
-package sg.edu.nus.camera;
+package sg.edu.nus.all_in_one;
 
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import sg.edu.nus.data.SensorDBHelper;
+import sg.edu.nus.data.SensorDBHelperCombinedCam;
 import sg.edu.nus.data.SensorsContract;
 
 /**
@@ -27,15 +27,18 @@ public class MediaSaver extends AsyncTask<byte[], String, String> {
     static  String  timeStamp;
     private Context ctx;
     long timestampPictureTaken = 0L;
+    SensorDBHelperCombinedCam helper;
 
-    public MediaSaver(Context ctx, Long timestamp) {
+    public MediaSaver(Context ctx, Long timestamp, SensorDBHelperCombinedCam helper) {
         this.ctx = ctx;
         this.timestampPictureTaken = timestamp;
+        this.helper = helper;
     }
 
     @Override
     protected String doInBackground(byte[]... data) {
 
+        Log.v("OH MY GOD", "HERE");
         File picFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
         if (picFile == null) {
             Log.e(TAG, "Error creating media file; are storage permissions correct?");
@@ -45,10 +48,8 @@ public class MediaSaver extends AsyncTask<byte[], String, String> {
             Uri uri = Uri.fromFile(picFile);
             Log.v("Uri", uri.getPath());
 
-            SensorDBHelper helper = new SensorDBHelper(ctx);
             SQLiteDatabase db = helper.getWritableDatabase();
 
-            db.setLockingEnabled(true);
             //Put in the values within a ContentValues.
             ContentValues values = new ContentValues();
             values.clear();
@@ -61,10 +62,10 @@ public class MediaSaver extends AsyncTask<byte[], String, String> {
                     null,
                     values,
                     SQLiteDatabase.CONFLICT_IGNORE);
-            db.setLockingEnabled(false);
             FileOutputStream fos = new FileOutputStream(picFile);
             fos.write(data[0]);
             fos.close();
+            db.close();
         } catch (FileNotFoundException e) {
             Log.e(TAG, "File not found: " + e.getMessage());
             e.getStackTrace();

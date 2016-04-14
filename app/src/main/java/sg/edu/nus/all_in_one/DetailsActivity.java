@@ -46,17 +46,6 @@ public class DetailsActivity extends Activity {
         listViewMic = (ListView) findViewById(R.id.listview_details_mic);
         listViewAcc = (ListView) findViewById(R.id.listview_details_acc);
 
-//        TextView textViewAudioTitle = new TextView(this);
-//        textViewAudioTitle.setText("AUDIO");
-//        textViewAudioTitle.setTextColor(getResources().getColor(R.color.colorPrimary));
-//        listViewMic.addHeaderView(textViewAudioTitle);
-
-//        TextView textViewAccTitle = new TextView(this);
-//        textViewAccTitle.setText("ACCELEROMETER");
-//        textViewAccTitle.setTextColor(getResources().getColor(R.color.colorPrimary));
-//        listViewAcc.addHeaderView(textViewAccTitle);
-
-
         Intent callingIntent = getIntent();
         if (callingIntent!= null){
             curFrameTimestamp = callingIntent.getStringExtra("cur_frame_timestamp");

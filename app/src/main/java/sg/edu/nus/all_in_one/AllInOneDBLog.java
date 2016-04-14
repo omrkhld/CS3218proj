@@ -14,15 +14,15 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import sg.edu.nus.camera.ThumbnailAdapter;
-import sg.edu.nus.data.SensorDBHelper;
+import sg.edu.nus.data.SensorDBHelperCombinedCam;
 import sg.edu.nus.data.SensorsContract;
 import sg.edu.nus.oztrafficcamera.R;
 
 public class AllInOneDBLog extends Activity {
 
     private ListAdapter listAdapter;
-    SensorDBHelper helper;
-    ListView       listView;
+    SensorDBHelperCombinedCam helper;
+    ListView                  listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,9 +34,9 @@ public class AllInOneDBLog extends Activity {
         listView = (ListView) findViewById(R.id.listview_aio_log);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view,int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 SQLiteCursor cursor = (SQLiteCursor) listView.getItemAtPosition(position);
-                String uri = cursor.getString(cursor.getColumnIndex(SensorsContract.CameraEntry.COLUMN_IMAGE_URI));
+                String       uri    = cursor.getString(cursor.getColumnIndex(SensorsContract.CameraEntry.COLUMN_IMAGE_URI));
                 String timestampClickedFrame = cursor.getString(cursor.getColumnIndex(SensorsContract.CameraEntry.COLUMN_TIMESTAMP));
                 String timestampNextFrame;
                 try {
@@ -57,7 +57,7 @@ public class AllInOneDBLog extends Activity {
         });
 
         //Get DBHelper to read from database
-        helper = new SensorDBHelper(this);
+        helper = new SensorDBHelperCombinedCam(this);
         SQLiteDatabase sqlDB = helper.getReadableDatabase();
         updateListView(sqlDB);
     }
