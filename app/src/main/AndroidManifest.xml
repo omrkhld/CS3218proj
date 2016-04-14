@@ -3,11 +3,13 @@
           xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- This app records A/V content from camera and stores it to disk -->
-    <uses-permission android:name="android.permission.RECORD_VIDEO" />
+    <uses-permission android:name="android.permission.RECORD_VIDEO"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-feature android:name="android.hardware.camera" />
-    <uses-feature android:name="android.hardware.camera.autofocus" />
+
+    <uses-feature android:name="android.hardware.camera"/>
+    <uses-feature android:name="android.hardware.camera.autofocus"/>
+
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
@@ -28,13 +30,12 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
-        <activity android:name=".CameraActivity"
+        <activity
+            android:name=".CameraActivity"
             android:configChanges="keyboardHidden|orientation"
-            android:screenOrientation="landscape"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".MainActivity"
+            android:screenOrientation="landscape">
         </activity>
-
         <activity
             android:name="sg.edu.nus.audio.MicrophoneActivity"
             android:label="@string/title_activity_microphone"
@@ -50,6 +51,8 @@
         <activity android:name="sg.edu.nus.accelerometer.AccelerometerDBLog">
         </activity>
         <activity android:name="sg.edu.nus.audio.MicrophoneDBLog">
+        </activity>
+        <activity android:name=".CameraDBLog">
         </activity>
     </application>
 

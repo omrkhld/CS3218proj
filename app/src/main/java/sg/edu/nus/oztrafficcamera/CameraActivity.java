@@ -1,6 +1,7 @@
 package sg.edu.nus.oztrafficcamera;
 
 import android.app.Activity;
+import android.content.Context;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.util.Log;
@@ -101,7 +102,7 @@ public class CameraActivity extends Activity {
                 long now = System.currentTimeMillis();
                 if (now > (mReferenceTime + pictureDelay)) {
                     mReferenceTime = now;
-                    CaptureThread thread = new CaptureThread();
+                    CaptureThread thread = new CaptureThread(getApplicationContext());
                     thread.start();
                 }
             }
@@ -169,12 +170,17 @@ public class CameraActivity extends Activity {
     }
 
     private class CaptureThread extends Thread {
+        Context ctx;
+
+        public CaptureThread(Context ctx){
+            this.ctx = ctx;
+        }
         @Override
         public void run() {
             Camera.PictureCallback mPicture = new Camera.PictureCallback() {
                 @Override
                 public void onPictureTaken(byte[] data, Camera camera) {
-                    new MediaSaver().execute(data);
+                    new MediaSaver(ctx).execute(data);
                     mCamera.startPreview();
                 }
             };

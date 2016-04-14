@@ -1,6 +1,9 @@
 package sg.edu.nus.oztrafficcamera;
 
 import android.annotation.SuppressLint;
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -13,11 +16,20 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import sg.edu.nus.data.SensorDBHelper;
+import sg.edu.nus.data.SensorsContract;
+
 /**
  * Created by Omar on 13/4/2016.
  */
 public class MediaSaver extends AsyncTask<byte[], String, String> {
     private static final String TAG = "MediaSaver";
+    static  String  timeStamp;
+    private Context ctx;
+
+    public MediaSaver(Context ctx) {
+        this.ctx = ctx;
+    }
 
     @Override
     protected String doInBackground(byte[]... data) {
@@ -28,6 +40,25 @@ public class MediaSaver extends AsyncTask<byte[], String, String> {
             return null;
         }
         try {
+            Uri uri = Uri.fromFile(picFile);
+            Log.v("Uri", uri.getPath());
+
+            SensorDBHelper helper = new SensorDBHelper(ctx);
+            SQLiteDatabase db = helper.getWritableDatabase();
+
+            //Put in the values within a ContentValues.
+            ContentValues values = new ContentValues();
+            values.clear();
+            values.put(SensorsContract.CameraEntry.COLUMN_TIMESTAMP, timeStamp);
+            values.put(SensorsContract.CameraEntry.COLUMN_IMAGE_URI, uri.getPath());
+
+            //Insert the values into the Table for Tasks
+            db.insertWithOnConflict(
+                    SensorsContract.CameraEntry.TABLE_NAME,
+                    null,
+                    values,
+                    SQLiteDatabase.CONFLICT_IGNORE);
+
             FileOutputStream fos = new FileOutputStream(picFile);
             fos.write(data[0]);
             fos.close();
@@ -45,12 +76,16 @@ public class MediaSaver extends AsyncTask<byte[], String, String> {
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
 
-    /** Create a file Uri for saving an image or video */
+    /**
+     * Create a file Uri for saving an image or video
+     */
     private static Uri getOutputMediaFileUri(int type) {
         return Uri.fromFile(getOutputMediaFile(type));
     }
 
-    /** Create a File for saving an image or video */
+    /**
+     * Create a File for saving an image or video
+     */
     @SuppressLint("SimpleDateFormat")
     private static File getOutputMediaFile(int type) {
         // To be safe, you should check that the SDCard is mounted
@@ -71,7 +106,7 @@ public class MediaSaver extends AsyncTask<byte[], String, String> {
         }
 
         // Create a media file name
-        String timeStamp = new SimpleDateFormat("HHmmss").format(new Date());
+        timeStamp = new SimpleDateFormat("HHmmss").format(new Date());
         File mediaFile;
         if (type == MEDIA_TYPE_IMAGE) {
             mediaFile = new File(mediaStorageDir.getPath() + File.separator

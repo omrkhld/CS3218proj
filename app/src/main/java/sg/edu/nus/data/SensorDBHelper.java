@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class SensorDBHelper extends SQLiteOpenHelper{
 
-    static final int DATABASE_VERSION  = 4;
+    static final int DATABASE_VERSION  = 5;
     static final String DATABASE_NAME = "sensors.db";
 
     public SensorDBHelper(Context context){
@@ -34,8 +34,16 @@ public class SensorDBHelper extends SQLiteOpenHelper{
                         SensorsContract.MicrophoneEntry.COLUMN_TIMESTAMP + " INTEGER NOT NULL," +
                         SensorsContract.MicrophoneEntry.COLUMN_AUDIO_SAMPLE + " BLOB NOT NULL" +
                         " );";
+
+        final String SQL_CREATE_CAMERA_TABLE =
+                "CREATE TABLE " + SensorsContract.CameraEntry.TABLE_NAME + " (" +
+                        SensorsContract.CameraEntry._ID + " INTEGER PRIMARY KEY," +
+                        SensorsContract.CameraEntry.COLUMN_TIMESTAMP + " INTEGER NOT NULL," +
+                        SensorsContract.CameraEntry.COLUMN_IMAGE_URI + " TEXT NOT NULL" +
+                        " );";
         db.execSQL(SQL_CREATE_ACCELEROMETER_TABLE);
         db.execSQL(SQL_CREATE_MICROPHONE_TABLE);
+        db.execSQL(SQL_CREATE_CAMERA_TABLE);
 
     }
 
@@ -43,6 +51,7 @@ public class SensorDBHelper extends SQLiteOpenHelper{
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + SensorsContract.AccelerometerEntry.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + SensorsContract.MicrophoneEntry.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + SensorsContract.CameraEntry.TABLE_NAME);
         onCreate(db);
 
     }

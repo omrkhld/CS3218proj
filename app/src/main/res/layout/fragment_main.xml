@@ -75,7 +75,7 @@
         android:id="@+id/button_testing"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="go_to_microphone"
+        android:onClick="all_sensors"
         android:text="@string/all_sensors"/>
 
 

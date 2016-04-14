@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void all_sensors(View view){
+        Intent intent = new Intent(this, CameraDBLog.class);
+        startActivity(intent);
 
     }
 

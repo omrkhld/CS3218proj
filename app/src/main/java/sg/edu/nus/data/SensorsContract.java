@@ -22,8 +22,12 @@ public class SensorsContract {
 
         public static final String COLUMN_TIMESTAMP = "timestamp";
         public static final String COLUMN_AUDIO_SAMPLE = "audiosample";
+    }
 
+    public class CameraEntry implements BaseColumns{
+        public static final String TABLE_NAME ="camera";
 
-
+        public static final String COLUMN_TIMESTAMP = "timestamp";
+        public static final String COLUMN_IMAGE_URI = "image";
     }
 }
