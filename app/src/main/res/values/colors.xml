@@ -4,8 +4,9 @@
     <!--<color name="colorPrimary">#EA2E49</color>-->
     <!--Spotify Green -->
     <color name="colorPrimary">#1cb952</color>
-    <!--Facebook Blue -->
-    <!--<color name="colorPrimary">#395996</color> -->
+    <color name="facebookBlue">#395996</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+
+
 </resources>

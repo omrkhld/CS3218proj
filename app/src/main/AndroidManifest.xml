@@ -65,6 +65,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="sg.edu.nus.oztrafficcamera.MainActivity"/>
         </activity>
+        <activity android:name="sg.edu.nus.all_in_one.DetailsActivity">
+        </activity>
     </application>
 
 </manifest>

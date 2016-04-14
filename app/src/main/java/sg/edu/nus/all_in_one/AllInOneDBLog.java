@@ -1,10 +1,15 @@
 package sg.edu.nus.all_in_one;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
+import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.app.Activity;
+import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
@@ -23,9 +28,33 @@ public class AllInOneDBLog extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_all_in_one_dblog);
+        final Intent intent = new Intent(this, DetailsActivity.class);
 
         //Find the listView
         listView = (ListView) findViewById(R.id.listview_aio_log);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,int position, long id) {
+                SQLiteCursor cursor = (SQLiteCursor) listView.getItemAtPosition(position);
+                String uri = cursor.getString(cursor.getColumnIndex(SensorsContract.CameraEntry.COLUMN_IMAGE_URI));
+                String timestampClickedFrame = cursor.getString(cursor.getColumnIndex(SensorsContract.CameraEntry.COLUMN_TIMESTAMP));
+                String timestampNextFrame;
+                try {
+                    SQLiteCursor cursor1 = (SQLiteCursor) listView.getItemAtPosition(position + 1);
+                    timestampNextFrame = cursor1.getString(cursor1.getColumnIndex(SensorsContract.CameraEntry.COLUMN_TIMESTAMP));
+                } catch (CursorIndexOutOfBoundsException e){
+                    // if last item was clicked
+                    timestampNextFrame = "INFINITY";
+                }
+                Log.v("Here", String.valueOf(timestampClickedFrame));
+                Log.v("Here", String.valueOf(timestampNextFrame));
+                intent.putExtra("cur_frame_timestamp", timestampClickedFrame);
+                intent.putExtra("next_frame_timestamp", timestampNextFrame);
+                intent.putExtra("image_uri", uri);
+
+                startActivity(intent);
+            }
+        });
 
         //Get DBHelper to read from database
         helper = new SensorDBHelper(this);
