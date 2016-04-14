@@ -27,4 +27,6 @@
     <string name="LAG">Lag (ms):</string>
     <string name="FPS">FPS:</string>
     <string name="TIME_MS">Time (ms):</string>
+    <string name="title_activity_all_in_one">AllInOneActivity</string>
+    <string name="title_activity_all_in_one_dblog">AllInOneDBLog</string>
 </resources>

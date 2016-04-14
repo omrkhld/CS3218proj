@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import sg.edu.nus.accelerometer.AccelerometerActivity;
+import sg.edu.nus.all_in_one.AllInOneActivity;
 import sg.edu.nus.audio.MicrophoneActivity;
 import sg.edu.nus.camera.CameraActivity;
 
@@ -49,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void all_sensors(View view){
+        Intent intent = new Intent(MainActivity.this, AllInOneActivity.class);
+        startActivity(intent);
 
 
     }
