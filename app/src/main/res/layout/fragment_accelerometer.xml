@@ -20,15 +20,16 @@
             android:id="@+id/textview_X"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
+            android:layout_weight="4"
             android:text="X"
+            android:gravity="center"
             android:textSize="22sp"/>
 
         <TextView
             android:id="@+id/textview_ax"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="8"/>
+            android:layout_weight="6"/>
 
     </LinearLayout>
 
@@ -42,7 +43,8 @@
             android:id="@+id/textview_Y"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
+            android:layout_weight="4"
+            android:gravity="center"
             android:text="Y"
             android:textSize="22sp"/>
 
@@ -50,7 +52,7 @@
             android:id="@+id/textview_ay"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="8"/>
+            android:layout_weight="6"/>
     </LinearLayout>
 
     <LinearLayout
@@ -63,36 +65,16 @@
             android:id="@+id/textview_Z"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
+            android:layout_weight="4"
             android:text="Z"
+            android:gravity="center"
             android:textSize="22sp"/>
 
         <TextView
             android:id="@+id/textview_az"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="8"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/textview_timestamps_label"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:text="Time:"
-            android:textSize="22sp"/>
-
-        <TextView
-            android:id="@+id/textview_accelerometer_timestamp"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="8"/>
+            android:layout_weight="6"/>
     </LinearLayout>
 
     <LinearLayout
@@ -105,16 +87,41 @@
             android:id="@+id/textview_accelerometer_fps_label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:text="FPS:"
+            android:layout_weight="4"
+            android:gravity="center"
+            android:text="@string/FPS"
             android:textSize="22sp"/>
 
         <TextView
             android:id="@+id/textview_accelerometer_fps"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="8"/>
+            android:layout_weight="6"/>
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textview_timestamps_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="4"
+            android:gravity="center"
+            android:text="@string/TIME_MS"
+            android:textSize="22sp"/>
+
+        <TextView
+            android:id="@+id/textview_accelerometer_timestamp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="6"/>
+    </LinearLayout>
+
+
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -126,37 +133,36 @@
             android:id="@+id/textview_lag_label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:text="Lag:"
+            android:layout_weight="4"
+            android:text="@string/LAG"
+            android:gravity="center"
             android:textSize="22sp"/>
 
         <TextView
             android:id="@+id/textview_lag"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="8"/>
+            android:layout_weight="6"/>
     </LinearLayout>
 
-    <LinearLayout
+    <Button
+        android:id="@+id/btn_start_record_acc"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content"
+        android:onClick="start_calibrate_acc"
+        android:text="@string/START_RECORDING"/>
 
-        <Button
-            android:id="@+id/btn_view_acc_db"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:onClick="calibrate_acc"
-            android:text="Calibrate"/>
+    <Button
+        android:id="@+id/btn_stop_record_acc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="stop_calibrate_acc"
+        android:text="@string/STOP_RECORDING"/>
 
-        <Button
-            android:id="@+id/btn_view_acc_db1"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:onClick="view_acc_log"
-            android:text="View Log"/>
-    </LinearLayout>
-
-
+    <Button
+        android:id="@+id/btn_view_acc_db1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="view_acc_log"
+        android:text="@string/VIEW_MIC_LOG"/>
 </LinearLayout>

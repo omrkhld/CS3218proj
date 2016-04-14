@@ -24,4 +24,7 @@
     <string name="STOP_RECORDING">Stop Recording</string>
     <string name="START_RECORDING">Start Recording</string>
     <string name="RECORDING">Recording...</string>
+    <string name="LAG">Lag (ms):</string>
+    <string name="FPS">FPS:</string>
+    <string name="TIME_MS">Time (ms):</string>
 </resources>

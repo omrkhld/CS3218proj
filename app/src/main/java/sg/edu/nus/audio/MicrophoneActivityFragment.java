@@ -22,7 +22,7 @@ public class MicrophoneActivityFragment extends Fragment {
 
     private RecordAudioTask task;
 
-    Button        startButton;
+    Button        startButton, playAudioButton;
     AudioRecorder recorder;
 
     public MicrophoneActivityFragment() {
@@ -37,6 +37,7 @@ public class MicrophoneActivityFragment extends Fragment {
         setHasOptionsMenu(true);
 
         startButton = (Button) rootView.findViewById(R.id.button_start_microphone);
+        playAudioButton = (Button) rootView.findViewById(R.id.button_view_play_audio);
         final Button stopButton = (Button) rootView.findViewById(R.id.button_stop_microphone);
         stopButton.setEnabled(false);
         startButton.setOnClickListener(
@@ -51,6 +52,7 @@ public class MicrophoneActivityFragment extends Fragment {
                         startButton.setText(R.string.RECORDING);
                         startButton.setEnabled(false);
                         stopButton.setEnabled(true);
+                        playAudioButton.setEnabled(false);
 
                     }
                 }
@@ -63,6 +65,7 @@ public class MicrophoneActivityFragment extends Fragment {
                         recorder.stopRecording();
                         startButton.setEnabled(true);
                         stopButton.setEnabled(false);
+                        playAudioButton.setEnabled(true);
                     }
                 }
         );
@@ -70,7 +73,6 @@ public class MicrophoneActivityFragment extends Fragment {
     }
 
     class RecordAudioTask extends AsyncTask<AudioClipListener, Long, DetailsOfRecording> {
-
         private final String LOG_TAG = RecordAudioTask.class.getSimpleName();
 
         private TextView textview_status_recording;

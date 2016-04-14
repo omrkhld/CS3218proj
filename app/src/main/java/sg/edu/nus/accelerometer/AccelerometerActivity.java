@@ -15,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import sg.edu.nus.data.SensorDBHelper;
@@ -31,7 +32,7 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
     private SensorManager sensorManager;
     private double        ax, ay, az;
     long mLastTime = 0;
-    long timestamp = 0;
+    long curTime   = 0;
     long diff      = 0;
 
     private double minX, maxX, minY, maxY, minZ, maxZ; //for calibration
@@ -43,17 +44,24 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
     private Boolean  calibratePressed;
     private Boolean  isStabilised;
     private Boolean  isLargeChanges;
+    private Boolean  foundShake;
     private Sensor   mAcc;
 
-    long lagTime;
+    AccelerometerReading reading;
 
-    public static  final int THRESHOLD_NUM_AXES_WITH_LARGE_CHANGES = 2;
+    long startTime = 0L;
+    long lag       = 0L;
+
+    public static final int THRESHOLD_NUM_AXES_WITH_LARGE_CHANGES = 2;
+
+    Button startRecording, stopRecording;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accelerometer);
         calibratePressed = false;
+        foundShake = false;
 
         textview_ax = (TextView) findViewById(R.id.textview_ax);
         textview_ay = (TextView) findViewById(R.id.textview_ay);
@@ -62,6 +70,9 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
         textview_accelerometer_fps = (TextView) findViewById(R.id.textview_accelerometer_fps);
         textview_lag = (TextView) findViewById(R.id.textview_lag);
 
+        startRecording = (Button) findViewById(R.id.btn_start_record_acc);
+        stopRecording = (Button) findViewById(R.id.btn_stop_record_acc);
+        stopRecording.setEnabled(false);
         // Use with getSystemService to retrieve an android.hardware.SensorManager for accessing sensors.
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mAcc = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -82,18 +93,33 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
     /*
     * Starts the calibration after stabilisation
     * */
-    public void calibrate_acc(View view) {
+    public void start_calibrate_acc(View view) {
+        startRecording.setEnabled(false);
+        startRecording.setText(R.string.RECORDING);
+        stopRecording.setEnabled(true);
         calibratePressed = true;
-        countRounds = 5;
+        foundShake = false;
+        countRounds = 3;
+        lag = 0;
         maxX = minX = ax;
         maxY = minY = ay;
         maxZ = minZ = az;
 
-        lagTime = System.currentTimeMillis();
-        long[] vibratePattern = {0, 200, 0};
+        startTime = System.currentTimeMillis();
+        long[] vibratePattern = {0, 250, 0};
 
         Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         vibrator.vibrate(vibratePattern, -1); // -1 for not repeating
+
+    }
+
+    public void stop_calibrate_acc(View view) {
+        startRecording.setEnabled(true);
+        startRecording.setText(R.string.START_RECORDING);
+        stopRecording.setEnabled(false);
+        calibratePressed = false;
+        foundShake = false;
+
     }
 
     @Override
@@ -112,10 +138,10 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
 
-            timestamp = System.currentTimeMillis();
-            diff = timestamp - mLastTime;
+            curTime = System.currentTimeMillis();
+            diff = curTime - mLastTime;
             textview_accelerometer_fps.setText(String.format("%.2f", 1.0 / diff * 1000));
-            mLastTime = timestamp;
+            mLastTime = curTime;
 
             ax = event.values[0];
             ay = event.values[1];
@@ -125,7 +151,7 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
             textview_ay.setText(String.valueOf(ay));
             textview_az.setText(String.valueOf(az));
 
-            textview_accelerometer_timestamp.setText(String.valueOf(timestamp));
+            textview_accelerometer_timestamp.setText(String.valueOf(curTime));
 
             //Loop a few rounds to find stable values
             if (countRounds > 0) {
@@ -155,21 +181,25 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
             Log.v("AY min and max:", minY + " " + maxY);
             Log.v("AZ min and max:", minZ + " " + maxZ);
 
+            reading = new AccelerometerReading(curTime, ax, ay, az, lag);
             if (calibratePressed && isStabilised) {
                 isLargeChanges = detectLargeChange(ax, ay, az);
                 Log.v("Large change", String.valueOf(isLargeChanges));
 
                 if (isLargeChanges) {
-                    textview_lag.setText(String.format("%d", diff));
-
+                    //Modify the lag
+                    lag = curTime - startTime;
+                    textview_lag.setText(String.format("%d", lag));
+                    reading.lag_in_ms = lag;
+                    foundShake = true;
                     isStabilised = false;
                     calibratePressed = false;
-                    AccelerometerReading reading = new AccelerometerReading(timestamp, ax, ay, az);
-                    //Starts asyncTask to write to database
-                    WriteToDatabaseTask task = new WriteToDatabaseTask(this);
-                    task.execute(reading);
                 }
-
+            }
+            if (foundShake){
+                //Starts asyncTask to write to database
+                WriteToDatabaseTask task = new WriteToDatabaseTask(this);
+                task.execute(reading);
             }
 
         }
@@ -194,7 +224,6 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
     }
 
     public void view_acc_log(View view) {
@@ -223,27 +252,20 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
             //Put in the values within a ContentValues.
             ContentValues values = new ContentValues();
             values.clear();
-            values.put(SensorsContract.AccelerometerEntry.COLUMN_TIMESTAMP, reading.getTimestamp());
+            values.put(SensorsContract.AccelerometerEntry.COLUMN_TIMESTAMP, reading.getTimestampOfSample());
             values.put(SensorsContract.AccelerometerEntry.COLUMN_AX, reading.getAx());
             values.put(SensorsContract.AccelerometerEntry.COLUMN_AY, reading.getAy());
             values.put(SensorsContract.AccelerometerEntry.COLUMN_AZ, reading.getAz());
 
-            //Insert the values into the Table for Tasks
+            //Insert the values into the Table for Accelerometer
             db.insertWithOnConflict(
                     SensorsContract.AccelerometerEntry.TABLE_NAME,
                     null,
                     values,
                     SQLiteDatabase.CONFLICT_IGNORE);
 
-            return reading.getTimestamp();
+            return reading.getTimestampOfSample();
 
         }
-
-//        @Override
-//        protected void onPostExecute(Long aLong) {
-//            super.onPostExecute(aLong);
-//            textview_lag.setText(String.valueOf(aLong));
-//
-//        }
     }
 }
