@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import sg.edu.nus.data.SensorDBHelper;
 import sg.edu.nus.data.SensorsContract;
@@ -109,7 +110,12 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
         long[] vibratePattern = {0, 250, 0};
 
         Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-        vibrator.vibrate(vibratePattern, -1); // -1 for not repeating
+        boolean isVibrator = vibrator.hasVibrator();
+        if (isVibrator) {
+            vibrator.vibrate(vibratePattern, -1); // -1 for not repeating
+        } else {
+            Toast.makeText(this, "This calibration requires a vibrator to work", Toast.LENGTH_SHORT).show();
+        }
 
     }
 
@@ -252,7 +258,7 @@ public class AccelerometerActivity extends AppCompatActivity implements SensorEv
             //Put in the values within a ContentValues.
             ContentValues values = new ContentValues();
             values.clear();
-            values.put(SensorsContract.AccelerometerEntry.COLUMN_TIMESTAMP, reading.getTimestampOfSample());
+            values.put(SensorsContract.AccelerometerEntry.COLUMN_TIMESTAMP, reading.getTimestampOfSample() - reading.lag_in_ms);
             values.put(SensorsContract.AccelerometerEntry.COLUMN_AX, reading.getAx());
             values.put(SensorsContract.AccelerometerEntry.COLUMN_AY, reading.getAy());
             values.put(SensorsContract.AccelerometerEntry.COLUMN_AZ, reading.getAz());

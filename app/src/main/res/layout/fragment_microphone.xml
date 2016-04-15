@@ -33,7 +33,7 @@
             android:id="@+id/button_start_microphone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@android:drawable/ic_btn_speak_now"
+            android:drawableLeft="@drawable/ic_keyboard_voice_white_18pt_2x"
             android:text="@string/START_MICROPHONE"/>
 
         <Button

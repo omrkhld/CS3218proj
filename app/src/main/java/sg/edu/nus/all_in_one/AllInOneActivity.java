@@ -21,6 +21,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import sg.edu.nus.accelerometer.AccelerometerReading;
 import sg.edu.nus.audio.AudioClipListener;
@@ -153,6 +154,8 @@ public class AllInOneActivity extends Activity implements SensorEventListener {
         inPreview = false;
         mCamera.release();
         mCamera = null;
+
+        sensorManager.unregisterListener(this);
     }
 
     @Override
@@ -164,6 +167,7 @@ public class AllInOneActivity extends Activity implements SensorEventListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        sensorManager.registerListener(this, mAcc, SensorManager.SENSOR_DELAY_UI);
     }
 
     private void releaseCameraAndPreview() {
@@ -186,7 +190,12 @@ public class AllInOneActivity extends Activity implements SensorEventListener {
         long[] vibratePattern = {0, 250, 0};
 
         Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-        vibrator.vibrate(vibratePattern, -1); // -1 for not repeating
+        boolean isVibrator = vibrator.hasVibrator();
+        if (isVibrator) {
+            vibrator.vibrate(vibratePattern, -1); // -1 for not repeating
+        } else {
+            Toast.makeText(this, "Accelerometer calibration requires a vibrator to work", Toast.LENGTH_SHORT).show();
+        }
 
 //        start_mic_recording();
     }
@@ -359,6 +368,7 @@ public class AllInOneActivity extends Activity implements SensorEventListener {
     private class CaptureThread extends Thread {
         Context                   ctx;
         SensorDBHelperCombinedCam helper;
+        Long camera_lag = 0L;
 
         public CaptureThread(Context ctx, SensorDBHelperCombinedCam helper) {
             this.ctx = ctx;
@@ -371,7 +381,10 @@ public class AllInOneActivity extends Activity implements SensorEventListener {
                 @Override
                 public void onPictureTaken(byte[] data, Camera camera) {
                     Long timestamp = System.currentTimeMillis();
-                    new MediaSaver(ctx, timestamp, helper).execute(data);
+                    camera_lag = timestamp - startTime;
+                    Log.v("Lag in camera", String.valueOf(camera_lag));
+                    lagTimeText.setText(String.valueOf(camera_lag));
+                    new MediaSaver(ctx, timestamp, helper, camera_lag).execute(data);
                     mCamera.startPreview();
                 }
             };
@@ -379,14 +392,11 @@ public class AllInOneActivity extends Activity implements SensorEventListener {
             startTime = System.currentTimeMillis();
             mCamera.takePicture(null, null, mPicture);
             numPhotos++;
-            endTime = System.currentTimeMillis();
             Log.d(TAG, "Num photos taken = " + numPhotos);
-            Log.d(TAG, "Lag = " + (endTime - startTime));
 
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    lagTimeText.setText(String.valueOf(endTime - startTime));
                     numPhotosText.setText(String.valueOf(numPhotos));
                 }
             });
@@ -435,8 +445,6 @@ public class AllInOneActivity extends Activity implements SensorEventListener {
                 } catch (RuntimeException se) {
                     Log.e(LOG_TAG, "Failed to record, recorder is already being used", se);
                 }
-//
-//                return recordingDetails;
             }
                 return recordingDetails;
         }
@@ -478,7 +486,7 @@ public class AllInOneActivity extends Activity implements SensorEventListener {
             //Put in the values within a ContentValues.
             ContentValues values = new ContentValues();
             values.clear();
-            values.put(SensorsContract.AccelerometerEntry.COLUMN_TIMESTAMP, reading.getTimestampOfSample());
+            values.put(SensorsContract.AccelerometerEntry.COLUMN_TIMESTAMP, reading.getTimestampOfSample() - reading.lag_in_ms);
             values.put(SensorsContract.AccelerometerEntry.COLUMN_AX, reading.getAx());
             values.put(SensorsContract.AccelerometerEntry.COLUMN_AY, reading.getAy());
             values.put(SensorsContract.AccelerometerEntry.COLUMN_AZ, reading.getAz());

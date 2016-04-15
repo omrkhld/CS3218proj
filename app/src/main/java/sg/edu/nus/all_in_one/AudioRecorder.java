@@ -164,7 +164,7 @@ public class AudioRecorder {
 
                         ContentValues values = new ContentValues();
                         values.clear();
-                        values.put(SensorsContract.MicrophoneEntry.COLUMN_TIMESTAMP, System.currentTimeMillis());
+                        values.put(SensorsContract.MicrophoneEntry.COLUMN_TIMESTAMP, System.currentTimeMillis()-details.lag);
                         values.put(SensorsContract.MicrophoneEntry.COLUMN_AUDIO_SAMPLE, bData);
 
                         //Insert the values into the Table for Tasks

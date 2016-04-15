@@ -65,26 +65,7 @@ public class DetailsActivity extends Activity {
             }
         }
 
-        //Get DBHelper to read from database
         helper = new SensorDBHelper(this);
-//        SQLiteDatabase sqlDB  = helper.getWritableDatabase();
-
-//        ContentValues values = new ContentValues();
-//        values.clear();
-//        values.put(SensorsContract.AccelerometerEntry.COLUMN_TIMESTAMP, "1460628843414");
-//        values.put(SensorsContract.AccelerometerEntry.COLUMN_AX, "100");
-//        values.put(SensorsContract.AccelerometerEntry.COLUMN_AY, "100");
-//        values.put(SensorsContract.AccelerometerEntry.COLUMN_AZ, "100");
-//
-//        //Insert the values into the Table for Accelerometer
-//        sqlDB.insertWithOnConflict(
-//                SensorsContract.AccelerometerEntry.TABLE_NAME,
-//                null,
-//                values,
-//                SQLiteDatabase.CONFLICT_IGNORE);
-//
-
-
         SQLiteDatabase sqlDB  = helper.getReadableDatabase();
         updateListView(sqlDB);
     }
@@ -108,11 +89,14 @@ public class DetailsActivity extends Activity {
                 this,
                 R.layout.log_acc_view,
                 cursorAcc,
-                new String[]{SensorsContract.AccelerometerEntry.COLUMN_TIMESTAMP,
+                new String[]{
+                        SensorsContract.AccelerometerEntry._ID,
+                        SensorsContract.AccelerometerEntry.COLUMN_TIMESTAMP,
                         SensorsContract.AccelerometerEntry.COLUMN_AX,
                         SensorsContract.AccelerometerEntry.COLUMN_AY,
                         SensorsContract.AccelerometerEntry.COLUMN_AZ},
-                new int[]{R.id.log_acc_textview_timestamp,
+                new int[]{R.id.log_acc_id,
+                        R.id.log_acc_textview_timestamp,
                         R.id.log_acc_textview_x,
                         R.id.log_acc_textview_y,
                         R.id.log_acc_textview_z},

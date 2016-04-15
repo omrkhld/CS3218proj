@@ -179,6 +179,7 @@ public class CameraActivity extends Activity {
 
     private class CaptureThread extends Thread {
         Context ctx;
+        Long camera_lag = 0L;
 
         public CaptureThread(Context ctx){
             this.ctx = ctx;
@@ -189,7 +190,10 @@ public class CameraActivity extends Activity {
                 @Override
                 public void onPictureTaken(byte[] data, Camera camera) {
                     Long timestamp = System.currentTimeMillis();
-                    new MediaSaver(ctx, timestamp).execute(data);
+                    camera_lag = timestamp - startTime;
+                    Log.v("Lag in camera", String.valueOf(camera_lag));
+                    lagTimeText.setText(String.valueOf(camera_lag));
+                    new MediaSaver(ctx, timestamp, camera_lag).execute(data);
                     mCamera.startPreview();
                 }
             };
@@ -197,14 +201,13 @@ public class CameraActivity extends Activity {
             startTime = System.currentTimeMillis();
             mCamera.takePicture(null, null, mPicture);
             numPhotos++;
-            endTime = System.currentTimeMillis();
             Log.d(TAG, "Num photos taken = " + numPhotos);
-            Log.d(TAG, "Lag = " + (endTime - startTime));
+//            Log.d(TAG, "Lag = " + (camera_lag));
 
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    lagTimeText.setText(String.valueOf(endTime - startTime));
+//                    lagTimeText.setText(String.valueOf(camera_lag));
                     numPhotosText.setText(String.valueOf(numPhotos));
                 }
             });

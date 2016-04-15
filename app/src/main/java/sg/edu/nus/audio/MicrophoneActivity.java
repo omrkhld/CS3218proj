@@ -19,13 +19,13 @@ import sg.edu.nus.oztrafficcamera.R;
 
 public class MicrophoneActivity extends AppCompatActivity {
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_microphone);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
     }
 
     public void view_mic_log(View view) {

@@ -10,20 +10,6 @@
               tools:context=".MainActivityFragment"
               tools:showIn="@layout/activity_main">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/Application"
-        android:id="@+id/textView_application"
-        android:gravity="center_vertical"/>
-
-    <Button
-        android:id="@+id/button_doppler"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="go_to_doppler"
-        android:text="@string/DOPPLER"/>
 
 
     <TextView
@@ -34,25 +20,21 @@
         android:id="@+id/textView_calibrate"
         android:gravity="center_vertical"/>
 
-    <!--<Button-->
-        <!--android:id="@+id/button_all_sensors_together"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:onClick="all_sensors"-->
-        <!--android:text="@string/ALL_SENSORS"/>-->
 
     <Button
         android:id="@+id/button_accelerometer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="go_to_accelerometer"
-        android:text="@string/ACCELEROMETER"/>
+        android:text="@string/ACCELEROMETER"
+        android:drawableLeft="@drawable/ic_vibration_white_36dp"/>
 
     <Button
         android:id="@+id/button_camera"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="go_to_camera"
+        android:drawableLeft="@drawable/ic_camera_alt_white_36dp"
         android:text="@string/CAMERA"/>
 
     <Button
@@ -60,6 +42,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="go_to_microphone"
+        android:drawableLeft="@drawable/ic_keyboard_voice_white_36dp"
         android:text="@string/MICROPHONE"/>
 
 
@@ -77,6 +60,12 @@
         android:layout_height="wrap_content"
         android:onClick="all_sensors"
         android:text="@string/all_sensors"/>
+
+    <TextView
+        android:layout_marginTop="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/mainpagedescription"/>
 
 
 </LinearLayout>
